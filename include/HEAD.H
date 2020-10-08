@@ -22,12 +22,16 @@ public:
                          Eigen::Vector2f&,
                          Eigen::Vector3f&,
                          Eigen::Matrix3f&);
-    Eigen::Vector3f GetWorldCoordinate() { return point_World; }
-    Eigen::Vector2f GetPicoCoordinate() { return point_Pixo; }
-    Eigen::Vector2f GetPicPrinCoordinate() { return point_PicPrin; }
-    Eigen::Vector2f GetEquFoclen() { return foclen_Equ; }
-    Eigen::Vector3f GetTranVec() { return tranT_Vec; }
-    Eigen::Matrix3f GetRotMatrix() { return rot_Mat; }
+    Eigen::Vector3f GetWorldCoordinate() const { return point_World; }
+    Eigen::Vector2f GetPicoCoordinate() const { return point_Pixo; }
+    Eigen::Vector2f GetPicPrinCoordinate() const { return point_PicPrin; }
+    Eigen::Vector2f GetEquFoclen() const { return foclen_Equ; }
+    Eigen::Vector3f GetTranVec() const { return tranT_Vec; }
+    Eigen::Matrix3f GetRotMatrix() const { return rot_Mat; }
+    Eigen::Matrix<float,3,4> GetParameters_in() const ;
+    Eigen::Matrix4f GetParameters_out() const ;
+    void ComputePoint_Pixo(const std::shared_ptr<CollinearityEquation>&);
+    Eigen::Vector2f GetPoint_Pixo() const { return point_Pixo; }
     ~CollinearityEquation() = default;
 
 private:

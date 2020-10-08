@@ -51,9 +51,12 @@ cout<<p->GetWorldCoordinate()<<"\n"<<
 p->GetPicPrinCoordinate()<<"\n"<<
 p->GetEquFoclen()<<"\n"<<
 p->GetTranVec()<<"\n"<<
-p->GetRotMatrix()<<"\n";
+p->GetRotMatrix()<<"\n\n";
 
-
+cout << p->GetParameters_in()<<"\n";
+cout << p->GetParameters_out()<<"\n\n";
+p->ComputePoint_Pixo(p);
+cout<<p->GetPoint_Pixo()<<"\n";
 
 
 
