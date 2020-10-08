@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "GoodLuck-Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/justinkin/OpenCV/myinstall/include/opencv4",
+                "/opt/intel/mkl/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "configurationProvider": "vector-of-bool.cmake-tools"
+        }
+    ],
+    "version": 4
+}

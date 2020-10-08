@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "GoodLuck-G++",
+            "type": "shell",
+            "command": "g++",
+            "args": [//编译时候的参数
+               "-mfma",//需要haswell
+               "-msse4",//4代u,4
+                "-mavx2",//4代u,2
+               //"-march=native",//启用您的cpu支持的所有选项，开太多负优化？
+                //"-O2",//推荐用2
+                "-fopenmp",//开启多线程，需要测试看看是不是负优化了
+
+               //"-g",//生成调试信息。GNU 调试器可利用该信息。
+                "${file}",
+                "-o",//指定生成可执行文件的名称
+                "${fileDirname}/${fileBasenameNoExtension}.out",
+
+                "-I","/opt/intel/mkl/include",//mkl.h
+
+                "-Wl,--no-as-needed",
+
+                "-L","/opt/intel/mkl/lib/intel64",
+                "-l","mkl_intel_lp64",//Eigen no use"ilp64" in x64 os
+                "-l","mkl_intel_thread",
+                "-l","mkl_core",
+
+                "-L","/opt/intel/lib/intel64",
+                "-l","iomp5",
+
+                "-l","pthread",
+                "-l","m",
+                "-l","dl",
+                "-Wl,-rpath=/opt/intel/mkl/lib/intel64,-rpath=/opt/intel/lib/intel64",
+
+                "-m64"
+
+                //"-Wl,--start-group /opt/intel/compilers_and_libraries/linux/mkl/lib/intel64/libmkl_intel_ilp64.a libmkl_intel_thread.a libmkl_core.a -Wl,--end-group -liomp5 -lpthread -lm -ldl"
+            ],
+        
+         "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared",
+            },         
+            "problemMatcher":  "$gcc"
+
+        }
+    ]
+}

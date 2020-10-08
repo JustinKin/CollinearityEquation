@@ -1,0 +1,54 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "GoodLuck-G++",
+            "command": "C:/mingw64/bin/g++.exe",
+            "args": [//编译时候的参数
+                //"-mfma",//需要haswell
+                //"-msse4",//4代u,4
+                //"-mavx2",//4代u,2
+                "-march=native",//启用您的cpu支持的所有选项，开太多负优化？
+                "-O2",//推荐用2
+                "-fopenmp",//开启多线程，需要测试看看是不是负优化了
+                "-g",//生成调试信息。GNU 调试器可利用该信息。
+
+                "${workspaceFolder}/src/*.cpp",
+                "-o",//指定生成可执行文件的名称
+                "${workspaceFolder}/bin/${fileBasenameNoExtension}.exe",
+                "-I","D:/QinJunyou/C/CollinearityEquation/include",
+                "-I","D:/QinJunyou/C/Eigen3/Eigen",
+                "-I","D:/MKL2020/compilers_and_libraries_2020.1.216/windows/mkl/include",//mkl.h
+
+                //"-Wl,--no-as-needed",
+
+                "-L","D:/MKL2020/compilers_and_libraries_2020.1.216/windows/mkl/lib/intel64_win",
+                "-l","mkl_intel_lp64_dll",//Eigen no use"ilp64" in x64 os
+                "-l","mkl_intel_thread_dll",
+                "-l","mkl_core_dll",
+
+                "-L","D:/MKL2020/compilers_and_libraries_2020.1.216/windows/redist/intel64_win/compiler",
+                "-l","iomp5md",
+
+                "-l","pthread",
+                "-l","m",
+                //"-l","dl",
+                //"-Wl,-rpath=D:/MKL2020/compilers_and_libraries_2020.1.216/windows/mkl/lib/intel64_win,-rpath=D:/MKL2020/compilers_and_libraries_2020.1.216/windows/compiler/lib/intel64_win",
+
+                "-m64"
+
+            ],
+            "options": {
+                "cwd": "C:/mingw64/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
