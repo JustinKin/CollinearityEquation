@@ -20,29 +20,7 @@ using namespace std;
     auto start = chrono::high_resolution_clock::now();
 // =============================================================================
 
-/*     MatrixXd a;
-    for(int i =0; i <1000000; ++i)
-    {
-        a = MatrixXd::Random(4, 4);
-        if(abs(a.determinant())<0.0001)
-        ++c;
-    }
-    cout<<a.determinant()<<endl;
- */
 
-/* Vector3f a( -129.571, 137.61, 981.975), b( -126.9, 152.4, 980.1) , m(-17.484, 21.1585, 135.622);
-a *= 0.001;
-b *= 0.001;
-m *= 0.001;
-auto cc1 = a.cross(m);
-cout << "cc1: \n"<<cc1<<endl<<'\n';
-auto test1 = cc1.dot(cc1);
-cout<<test1<<endl;
-
-auto cc2 = a.cross(b);
-cout << "cc2: \n"<<cc2<<endl<<'\n';
-auto test2 = cc2.dot(cc2);
-cout<<test2<<endl; */
 
 auto p = Initialize();
 
