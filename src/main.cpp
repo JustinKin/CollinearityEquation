@@ -71,7 +71,7 @@ BG:
                     in_CW2.close();
 
                     ComputePoint_World(p1,p2);
-                    ofstream out_CW(result_pixo);
+                    ofstream out_CW(result_world);
                     ShowResult_CW(p1,p2,out_CW);
                     out_CW.close();
 
@@ -88,19 +88,6 @@ BG:
         }
         goto BG;
     }
-
-    // ifstream in_CW(ComputePoint_World);
-    // ofstream out_CW(result_world);
-
-
-
-
-
-
-
-
-
-
 
 
 

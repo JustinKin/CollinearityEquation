@@ -12,7 +12,7 @@
 // using namespace Eigen;
 using namespace std;
 
-//no point_Pixo
+//no point_Pixo: (~x,~y)
 CollinearityEquation::CollinearityEquation( Eigen::Vector3f &point_World_,
                                             Eigen::Vector2f &point_PicPrin_,
                                             Eigen::Vector2f &foclen_Equ_,
@@ -20,6 +20,15 @@ CollinearityEquation::CollinearityEquation( Eigen::Vector3f &point_World_,
                                             Eigen::Matrix3f &rot_Mat_ ) :
     point_World(point_World_),point_PicPrin(point_PicPrin_),
     foclen_Equ(foclen_Equ_),tranT_Vec(tranT_Vec_),rot_Mat(rot_Mat_){}
+//no point_World: (X,Y,Z)
+CollinearityEquation::CollinearityEquation( Eigen::Vector2f &point_Pixo_,
+                                            Eigen::Vector2f &point_PicPrin_,
+                                            Eigen::Vector2f &foclen_Equ_,
+                                            Eigen::Vector3f &tranT_Vec_,
+                                            Eigen::Matrix3f &rot_Mat_ ) :
+    point_Pixo(point_Pixo_),point_PicPrin(point_PicPrin_),
+    foclen_Equ(foclen_Equ_),tranT_Vec(tranT_Vec_),rot_Mat(rot_Mat_){}
+
 //all
 CollinearityEquation::CollinearityEquation( Eigen::Vector3f &point_World_,
                                             Eigen::Vector2f &point_Pixo_,
@@ -253,16 +262,16 @@ void ComputePoint_World(const shared_ptr<CollinearityEquation>& p1, const shared
 
 void ShowResult_CP(shared_ptr<CollinearityEquation> p, ofstream &out)
 {
-    out<<"\n================result================\n";
-    out<<"World Coordinate: (X,Y,Z):\n"<<p->GetWorldCoordinate()<<"\n\n"<<
+    cout<<"\n================result================\n";
+    cout<<"World Coordinate: (X,Y,Z):\n"<<p->GetWorldCoordinate()<<"\n\n"<<
     "Pic Principle Coordinate: (Cx,Cy):\n"<<p->GetPicPrinCoordinate()<<"\n\n"<<
     "Equivalent Focal Length: (Fx,Fy):\n"<<p->GetEquFoclen()<<"\n\n"<<
     "Translation Vector: (Tx,Ty,Tz):\n"<<p->GetTranVec()<<"\n\n"<<
     "Rotation Matrix: (r0 ~ r8):\n"<<p->GetRotMatrix()<<"\n\n";
-    out<<"Parameters_in:\n" << p->GetParameters_in()<<"\n\n";
-    out<<"Parameters_out:\n"<< p->GetParameters_out()<<"\n\n";
+    cout<<"Parameters_in:\n" << p->GetParameters_in()<<"\n\n";
+    cout<<"Parameters_out:\n"<< p->GetParameters_out()<<"\n\n";
     p->ComputePoint_Pixo(p);
-    out<<"Pic Coordinate of opt: (~x,~y):\n"<<p->GetPoint_Pixo()<<"\n\n";
+    cout<<"Pic Coordinate of opt: (~x,~y):\n"<<p->GetPoint_Pixo()<<"\n\n";
 
     out<<"\n================result================\n";
     out<<"World Coordinate: (X,Y,Z):\n"<<p->GetWorldCoordinate()<<"\n\n"<<
