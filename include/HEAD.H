@@ -9,19 +9,26 @@
 class CollinearityEquation
 {
 public:
-    //no point_Pixo
-    CollinearityEquation(Eigen::Vector3f&,
-                         Eigen::Vector2f&,
-                         Eigen::Vector2f&,
-                         Eigen::Vector3f&,
-                         Eigen::Matrix3f&);
+    CollinearityEquation() = default;
+    //no point_Pixo: (~x,~y)
+    CollinearityEquation(Eigen::Vector3f& point_World_,
+                         Eigen::Vector2f& point_PicPrin_,
+                         Eigen::Vector2f& foclen_Equ_,
+                         Eigen::Vector3f& tranT_Vec_,
+                         Eigen::Matrix3f& rot_Mat_);
+    //no point_World: (X,Y,Z)
+    CollinearityEquation(Eigen::Vector2f& point_Pixo_,
+                         Eigen::Vector2f& point_PicPrin_,
+                         Eigen::Vector2f& foclen_Equ_,
+                         Eigen::Vector3f& tranT_Vec_,
+                         Eigen::Matrix3f& rot_Mat_);
     //all
-    CollinearityEquation(Eigen::Vector3f&,
-                         Eigen::Vector2f&,
-                         Eigen::Vector2f&,
-                         Eigen::Vector2f&,
-                         Eigen::Vector3f&,
-                         Eigen::Matrix3f&);
+    CollinearityEquation(Eigen::Vector3f& point_World_,
+                         Eigen::Vector2f& point_Pixo_,
+                         Eigen::Vector2f& point_PicPrin_,
+                         Eigen::Vector2f& foclen_Equ_,
+                         Eigen::Vector3f& tranT_Vec_,
+                         Eigen::Matrix3f& rot_Mat_);
     Eigen::Vector3f GetWorldCoordinate() const { return point_World; }
     Eigen::Vector2f GetPicoCoordinate() const { return point_Pixo; }
     Eigen::Vector2f GetPicPrinCoordinate() const { return point_PicPrin; }
@@ -35,16 +42,22 @@ public:
     ~CollinearityEquation() = default;
 
 private:
+    // World Coordinate: (X,Y,Z)
     Eigen::Vector3f point_World;
+    // Pic Coordinate of opt: (~x,~y)
     Eigen::Vector2f point_Pixo;
+    // Pic Principle Coordinate: (Cx,Cy)
     Eigen::Vector2f point_PicPrin;
+    // Equivalent Focal Length: (Fx,Fy)
     Eigen::Vector2f foclen_Equ;
+    // Translation Vector: (Tx,Ty,Tz)
     Eigen::Vector3f tranT_Vec;
+    // Rotation Matrix: (r0 ~ r8)
     Eigen::Matrix3f rot_Mat;
 
 };
 
-std::shared_ptr<CollinearityEquation> Initialize();
+std::shared_ptr<CollinearityEquation> Initialize_CP(std::ifstream &ComputePoint_Pixo_);
 
 
 
