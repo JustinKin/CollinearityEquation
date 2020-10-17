@@ -8,6 +8,8 @@
 
 class CollinearityEquation
 {
+friend void ComputePoint_World(const std::shared_ptr<CollinearityEquation>&,const std::shared_ptr<CollinearityEquation>&);
+
 public:
     CollinearityEquation() = default;
     //no point_Pixo: (~x,~y)
@@ -58,7 +60,11 @@ private:
 };
 
 std::shared_ptr<CollinearityEquation> Initialize_CP(std::ifstream &ComputePoint_Pixo_);
+std::shared_ptr<CollinearityEquation> Initialize_CW(std::ifstream &ComputePoint_World_);
 
+void ShowResult_CP(std::shared_ptr<CollinearityEquation> cp_, std::ofstream &out_);
+void ShowResult_CW(std::shared_ptr<CollinearityEquation> cw1_, std::shared_ptr<CollinearityEquation> cw2_, std::ofstream &out_);
+void ComputePoint_World(const std::shared_ptr<CollinearityEquation>&,const std::shared_ptr<CollinearityEquation>&);
 
 
 
