@@ -1,11 +1,11 @@
 World Coordinate: (X,Y,Z)
 100 100 100
 Pic Principle Coordinate: (Cx,Cy)
-10 10
+1200 1200
 Equivalent Focal Length: (Fx,Fy)
-2 2
+800 800
 Translation Vector: (Tx,Ty,Tz)
-3 3 3
+50 50 50
 Rotation Matrix: (r0 ~ r8)
 1 0 0
 0 1 0
