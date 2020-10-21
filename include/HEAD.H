@@ -5,6 +5,8 @@
 #include<memory>
 #include<D:/QinJunyou/C/Eigen3/Eigen/Eigen>
 
+class WorldPara;
+
 class CamPara
 {
 
@@ -33,7 +35,20 @@ private:
     Eigen::Matrix3f rot_Mat;
 };
 
-class WorldPara : public CamPara
+class Calculate : public CamPara
+{
+public:
+    Calculate() = default;
+    ~Calculate();
+
+
+private:
+    //multiple cameras
+    void ComputePoint_World(const std::vector<std::shared_ptr<WorldPara>>&);
+};
+
+
+class WorldPara : public Calculate
 {
 
 public:
@@ -53,7 +68,7 @@ private:
 
 };
 
-class PicPara_opt : public CamPara
+class PicPara_opt : public Calculate
 {
 
 public:
