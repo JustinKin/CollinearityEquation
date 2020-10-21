@@ -44,7 +44,7 @@ public:
 
 private:
     //multiple cameras
-    void ComputePoint_World(const std::vector<std::shared_ptr<WorldPara>>&);
+    // void ComputePoint_World(const std::vector<std::shared_ptr<WorldPara>>&);
 };
 
 
