@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Good-Luck",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "D:/QinJunyou/C/CollinearityEquation2/include",
+                "D:/QinJunyou/C/Eigen3/Eigen"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.17763.0",
+            "compilerPath": "C:/mingw64/bin/g++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64",
+            "configurationProvider": "vector-of-bool.cmake-tools"
+        }
+    ],
+    "version": 4
+}

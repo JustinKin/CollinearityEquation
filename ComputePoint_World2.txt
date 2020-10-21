@@ -1,0 +1,12 @@
+Pic Coordinate of opt: (~x,~y)
+8 8
+Pic Principle Coordinate: (Cx,Cy)
+10 10
+Equivalent Focal Length: (Fx,Fy)
+2 2
+Translation Vector: (Tx,Ty,Tz)
+3 3 3
+Rotation Matrix: (r0 ~ r8)
+1 0 0
+0 1 0
+0 0 1
