@@ -253,9 +253,9 @@ void ComputePoint_World(const shared_ptr<CollinearityEquation>& p1, const shared
     for(int i = 0; i <3; ++i)
     {
         Eigen::Matrix3f tmp = a;
-        a(0,i) = b[0];
-        a(1,i) = b[1];
-        a(2,i) = b[2];
+        tmp(0,i) = b[0];
+        tmp(1,i) = b[1];
+        tmp(2,i) = b[2];
         p1->point_World[i] = (tmp.determinant()) / a_D;
     }
 }
