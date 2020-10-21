@@ -4,7 +4,7 @@
             "name": "Good-Luck",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:/QinJunyou/C/CollinearityEquation2/include",
+                "D:/QinJunyou/C/CollinearityEquation/include",
                 "D:/QinJunyou/C/Eigen3/Eigen"
             ],
             "defines": [

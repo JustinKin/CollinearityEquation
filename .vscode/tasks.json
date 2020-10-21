@@ -17,7 +17,7 @@
                 "${workspaceFolder}/src/*.cpp",
                 "-o",//指定生成可执行文件的名称
                 "${workspaceFolder}/bin/${fileBasenameNoExtension}.exe",
-                "-I","D:/QinJunyou/C/CollinearityEquation2/include",
+                "-I","D:/QinJunyou/C/CollinearityEquation/include",
                 "-I","D:/QinJunyou/C/Eigen3/Eigen",
                 // "-I","D:/MKL2020/compilers_and_libraries_2020.1.216/windows/mkl/include",//mkl.h
 
