@@ -30,12 +30,15 @@ class Calculate
 {
 public:
     Calculate() = default;
+    Calculate(std::vector<std::shared_ptr<CamPara>> Cams_);
     ~Calculate() = default;
     std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
 
 private:
     // parameters of cameras
     std::vector<std::shared_ptr<CamPara>> Cams;
+    //read a list of txt for Initialize
+    virtual std::shared_ptr<Calculate> Initialize(std::vector<std::string>& camsFile_,std::vector<std::string>& pointsFile_) =0;
     //multiple cameras
     virtual void ComputePoint(const std::shared_ptr<Calculate>&) = 0;
     //save and show results
@@ -49,8 +52,9 @@ friend class Calculate;
 public:
     WorldPara() = default;
     WorldPara(  std::vector<std::shared_ptr<CamPara>> Cams_,
-                Eigen::Vector3f& point_World_);
+                std::vector<Eigen::Vector3f>& point_World_);
     std::vector<Eigen::Vector3f> GetWorldCoordinate() const { return point_World; }
+    std::shared_ptr<Calculate> Initialize(std::vector<std::string>& camsFile_,std::vector<std::string>& pointsFile_) override;
     void ComputePoint(const std::shared_ptr<Calculate>& WorldPara_) override;
     void ShowResult(const std::shared_ptr<Calculate>& WorldPara_, std::ofstream & out_) override;
     ~WorldPara() = default;
@@ -69,8 +73,9 @@ friend class Calculate;
 public:
     PicPara_opt() = default;
     PicPara_opt(std::vector<std::shared_ptr<CamPara>> Cams_,
-                Eigen::Vector2f& point_Pixo_);
+                std::vector<Eigen::Vector2f>& point_Pixo_);
     std::vector<Eigen::Vector2f> GetPicoCoordinate() const { return point_Pixo; }
+    std::shared_ptr<Calculate> Initialize(std::vector<std::string>& camsFile_,std::vector<std::string>& pointsFile_) override;
     void ComputePoint(const std::shared_ptr<Calculate>& PicPara_opt_) override;
     void ShowResult(const std::shared_ptr<Calculate>& PicPara_opt_, std::ofstream & out_) override;
     ~PicPara_opt() = default;

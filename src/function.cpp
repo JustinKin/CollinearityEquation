@@ -12,6 +12,41 @@
 // using namespace Eigen;
 using namespace std;
 
+CamPara::CamPara(Eigen::Vector2f& point_PicPrin_,
+                 Eigen::Vector2f& foclen_Equ_,
+                 Eigen::Vector3f& tranT_Vec_,
+                 Eigen::Matrix3f& rot_Mat_) :
+    point_PicPrin(point_PicPrin_), foclen_Equ(foclen_Equ_),tranT_Vec(tranT_Vec_), rot_Mat(rot_Mat_){}
+
+Calculate::Calculate(std::vector<std::shared_ptr<CamPara>> Cams_) : Cams(Cams_) {}
+
+WorldPara::WorldPara(std::vector<std::shared_ptr<CamPara>> Cams_,
+                     std::vector<Eigen::Vector3f>& point_World_) :
+    Calculate::Calculate(Cams_),point_World(point_World_){}
+
+
+
+
+PicPara_opt::PicPara_opt(std::vector<std::shared_ptr<CamPara>> Cams_,
+                         std::vector<Eigen::Vector2f>& point_Pixo_) :
+    Calculate::Calculate(Cams_),point_Pixo(point_Pixo_){}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //no point_Pixo: (~x,~y)
 CollinearityEquation::CollinearityEquation( Eigen::Vector3f &point_World_,
                                             Eigen::Vector2f &point_PicPrin_,
