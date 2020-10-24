@@ -21,11 +21,12 @@ using namespace std;
 // =============================================================================
     string  ComputePoint_Pixo("cam_w"),
             ComputePoint_World("cam_p"),
-            result_pixo("result_pixo.txt"),
-            result_world("result_world.txt");
+            result_pixo("result_pixo_"),
+            result_world("result_world_");
     WorldPara worldpara;
     int choice;
  BG:
+    cout << "=======================================\n";
     cout << "1.Compute Pic Coordinate of opt: (~x,~y)\n";
     cout << "2.Compute World Coordinate: (X,Y,Z):\n";
     cout << "3.EXIT\n\n";
@@ -35,8 +36,12 @@ using namespace std;
         {
             case 1:
                 {
-                    auto p = worldpara.Initialize(ComputePoint_Pixo);
+                    auto p = make_shared<WorldPara>(worldpara);
+                    worldpara.Initialize(p,ComputePoint_Pixo);
+                    p->ComputeCamPara_in();
+                    p->ComputeCamPara_out();
                     worldpara.ComputePoint(p);
+                    worldpara.ShowResult(p,result_pixo);
 
                 };
                 break;

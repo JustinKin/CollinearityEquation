@@ -31,22 +31,30 @@ class Calculate
 public:
     Calculate() = default;
     Calculate(std::vector<std::shared_ptr<CamPara>> Cams_);
-    ~Calculate() = default;
-    std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
-    virtual std::shared_ptr<std::vector<Eigen::Matrix<float,3,4>>> GetCamPara_in(const std::shared_ptr<Calculate>&) const ;
-    virtual std::shared_ptr<std::vector<Eigen::Matrix4f>> GetCamPara_out(const std::shared_ptr<Calculate>&) const ;
+    // Calculate(std::vector<std::shared_ptr<CamPara>> Cams_,
+    //           std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> point_World_);
+    // Calculate(std::vector<std::shared_ptr<CamPara>> Cams_,
+    //           std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo_);
+    virtual ~Calculate() = default;
 
-
-private:
     // parameters of cameras
     std::vector<std::shared_ptr<CamPara>> Cams;
+    std::shared_ptr<std::vector<Eigen::Matrix<float,3,4>>> CamPara_in;
+    std::shared_ptr<std::vector<Eigen::Matrix4f>> CamPara_out;
+    std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
+    virtual void ComputeCamPara_in() ;
+    virtual void ComputeCamPara_out() ;
+
+private:
     //read a list of txt for Initialize
-    virtual std::shared_ptr<Calculate> Initialize(const std::string &file_) =0;
+    virtual void Initialize(std::shared_ptr<Calculate>,const std::string &file_) =0;
     //multiple cameras
     virtual void ComputePoint(const std::shared_ptr<Calculate>&) = 0;
     //save and show results
-    virtual void ShowResult(const std::shared_ptr<Calculate>&, std::ofstream &) = 0;
+    virtual void ShowResult(const std::shared_ptr<Calculate>&, const std::string &outfile_) = 0;
 };
+
+// class
 
 
 class WorldPara : public Calculate
@@ -57,9 +65,9 @@ public:
     WorldPara(  std::vector<std::shared_ptr<CamPara>> Cams_,
                 std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>>& point_World_);
     std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> GetWorldCoordinate() const { return point_World; }
-    std::shared_ptr<Calculate> Initialize(const std::string &file_) override;
+    void Initialize(std::shared_ptr<Calculate> WorldPara_,const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate>& WorldPara_) override;
-    void ShowResult(const std::shared_ptr<Calculate>& WorldPara_, std::ofstream & out_) override;
+    void ShowResult(const std::shared_ptr<Calculate>& WorldPara_, const std::string &outfile_) override;
     ~WorldPara() = default;
 
 private:
@@ -78,9 +86,9 @@ public:
     PicPara_opt(std::vector<std::shared_ptr<CamPara>> Cams_,
                 std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>>& point_Pixo_);
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> GetPicoCoordinate() const { return point_Pixo; }
-    std::shared_ptr<Calculate> Initialize(const std::string &file_) override;
+    void Initialize(std::shared_ptr<Calculate> PicPara_opt_,const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate>& PicPara_opt_) override;
-    void ShowResult(const std::shared_ptr<Calculate>& PicPara_opt_, std::ofstream & out_) override;
+    void ShowResult(const std::shared_ptr<Calculate>& PicPara_opt_, const std::string &outfile_) override;
     ~PicPara_opt() = default;
 
 private:
@@ -92,7 +100,7 @@ private:
 };
 
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);
-const void CheckData(std::vector<std::shared_ptr<std::vector<std::string>>> file_ , const std::string &str_) ;
+void CheckData(std::vector<std::shared_ptr<std::vector<std::string>>> file_ , const std::string &str_) ;
 
 
 
