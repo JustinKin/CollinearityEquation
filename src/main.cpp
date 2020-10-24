@@ -10,9 +10,8 @@
 #include "HEAD.H"
 
 
-using namespace Eigen;
+// using namespace Eigen;
 using namespace std;
-
 
    int main()
 {
@@ -20,13 +19,13 @@ using namespace std;
     cout << "  Mission Start:  \n\n";
     auto start = chrono::high_resolution_clock::now();
 // =============================================================================
-    string  ComputePoint_Pixo("ComputePoint_Pixo.txt"),
-            ComputePoint_World1("ComputePoint_World1.txt"),
-            ComputePoint_World2("ComputePoint_World2.txt"),
+    string  ComputePoint_Pixo("cam_w"),
+            ComputePoint_World("cam_p"),
             result_pixo("result_pixo.txt"),
             result_world("result_world.txt");
+    WorldPara worldpara;
     int choice;
-BG:
+ BG:
     cout << "1.Compute Pic Coordinate of opt: (~x,~y)\n";
     cout << "2.Compute World Coordinate: (X,Y,Z):\n";
     cout << "3.EXIT\n\n";
@@ -36,23 +35,14 @@ BG:
         {
             case 1:
                 {
-                    ifstream in_CP(ComputePoint_Pixo);
-                    if(!in_CP)
-                    {
-                        cerr<<"couldn't open : " + ComputePoint_Pixo;
-                        return -1;
-                    }
-                    auto p = Initialize_CP(in_CP);
-                    in_CP.close();
-                    ofstream out_CP(result_pixo);
-                    ShowResult_CP(p,out_CP);
-                    out_CP.close();
+                    auto p = worldpara.Initialize(ComputePoint_Pixo);
+                    worldpara.ComputePoint(p);
 
                 };
                 break;
             case 2:
                 {
-                    ifstream in_CW1(ComputePoint_World1);
+/*                     ifstream in_CW1(ComputePoint_World1);
                     if(!in_CW1)
                     {
                         cerr<<"couldn't open : " + ComputePoint_World1;
@@ -74,7 +64,7 @@ BG:
                     ofstream out_CW(result_world);
                     ShowResult_CW(p1,p2,out_CW);
                     out_CW.close();
-
+ */
                 };
                 break;
 

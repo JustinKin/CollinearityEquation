@@ -18,19 +18,188 @@ CamPara::CamPara(Eigen::Vector2f& point_PicPrin_,
                  Eigen::Matrix3f& rot_Mat_) :
     point_PicPrin(point_PicPrin_), foclen_Equ(foclen_Equ_),tranT_Vec(tranT_Vec_), rot_Mat(rot_Mat_){}
 
-Calculate::Calculate(std::vector<std::shared_ptr<CamPara>> Cams_) : Cams(Cams_) {}
+Calculate::Calculate(vector<shared_ptr<CamPara>> Cams_) : Cams(Cams_) {}
 
-WorldPara::WorldPara(std::vector<std::shared_ptr<CamPara>> Cams_,
-                     std::vector<Eigen::Vector3f>& point_World_) :
+WorldPara::WorldPara(vector<shared_ptr<CamPara>> Cams_,
+                     vector<shared_ptr<vector<Eigen::Vector3f>>>& point_World_) :
     Calculate::Calculate(Cams_),point_World(point_World_){}
 
+shared_ptr<Calculate> WorldPara::Initialize(const string &file_)
+{
+    auto files = ReadFiles(file_);
+    string str("World Coordinate: (X,Y,Z)");
+    CheckData(files,str);
+    vector<shared_ptr<CamPara>> Cams;
+    for(const auto &eachfile : files)
+    {
+        Eigen::Vector2f point_PicPrin;
+        Eigen::Vector2f foclen_Equ;
+        Eigen::Vector3f tranT_Vec;
+        Eigen::Matrix3f rot_Mat;
+        vector<shared_ptr<vector<Eigen::Vector3f>>> point_World;
+        string line;
+        for(int i = 1 ;i <12; i += 2)
+        {
+            istringstream iss((*eachfile)[i]);
+            string s;
+            // TODO: sepatrate case 1,3,5,7 to a individual function
+            switch(i)
+                {
+                    case 1:
+                        {
+                            int j = 0;
+                            while(iss >>s)
+                                point_PicPrin[j++] = stof(s);
+                        };
+                        break;
+                    case 3:
+                        {
+                            int j = 0;
+                            while(iss >>s)
+                                foclen_Equ[j++] = stof(s);
+                        };
+                        break;
+                    case 5:
+                        {
+                            int j = 0;
+                            while(iss >>s)
+                                tranT_Vec[j++] = stof(s);
+                        };
+                        break;
+                    case 7:
+                        {
+                            int c = 0;
+                            while(iss >>s)
+                                rot_Mat(0,c++) = stof(s);
+                            for(int j = 1; j <3; ++j)
+                            {
+                                istringstream is((*eachfile)[++i]);
+                                string s;
+                                int k = 0;
+                                while(is >>s)
+                                    rot_Mat(j,k++) = stof(s);
+                            }
+                        };
+                        break;
+                    case 11:
+                        {
+                            Eigen::Vector3f point;
+                            vector<Eigen::Vector3f> vec_point;
+                            auto bg = (*eachfile).begin() + 11;
+                            auto end = (*eachfile).end();
+                            for( ; bg != end; ++bg)
+                            {
+                                istringstream is(*bg);
+                                string s;
+                                int j = 0;
+                                while(is >> s)
+                                    point[j++] = stof(s);
+                                vec_point.push_back(point);
+                            }
+                            point_World.push_back(make_shared<vector<Eigen::Vector3f>>(vec_point));
+                        };
+                        break;
+                    default:
+                        {
+                            cerr<<"read error!\n";
+                            return nullptr;
+                        }
+                }
+        }
+        Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin,foclen_Equ,tranT_Vec,rot_Mat)));
+    }
+    return make_shared<WorldPara>(WorldPara(Cams,point_World));
+}
 
 
-
-PicPara_opt::PicPara_opt(std::vector<std::shared_ptr<CamPara>> Cams_,
-                         std::vector<Eigen::Vector2f>& point_Pixo_) :
+PicPara_opt::PicPara_opt(vector<shared_ptr<CamPara>> Cams_,
+                         vector<shared_ptr<vector<Eigen::Vector2f>>>& point_Pixo_) :
     Calculate::Calculate(Cams_),point_Pixo(point_Pixo_){}
 
+vector<shared_ptr<vector<string>>> ReadFiles(const string &file_)
+{
+    int i =0;
+    string line;
+    vector<string> file;
+    vector<shared_ptr<vector<string>>> vec_ptr;
+    while(1)
+    {
+        string filename(file_ + to_string(i++) + ".txt");
+        ifstream in(filename);
+        if(in)
+        {
+            while(getline(in,line))
+            {
+                file.push_back(line);
+            }
+            in.close();
+            vec_ptr.push_back(make_shared<vector<string>>(file));
+        }
+        else
+        {
+            return vec_ptr;
+        }
+    }
+}
+
+const void CheckData(vector<shared_ptr<vector<string>>> file, string &str_)
+{
+    int i = 1;
+    for(const auto &c : file)
+    {
+        string s1("Pic Principle Coordinate: (Cx,Cy)");
+        string s2("Equivalent Focal Length: (Fx,Fy)");
+        string s3("Translation Vector: (Tx,Ty,Tz)");
+        string s4("Rotation Matrix: (r0 ~ r8)");
+
+        auto bg = (*c).cbegin();
+        if(*bg != s1 || *(bg + 2) != s2 || *(bg + 4) != s3 || *(bg + 6) != s4 || *(bg + 10) != str_)
+            throw("Data error: " + i);
+        ++i;
+    }
+}
+
+shared_ptr<vector<Eigen::Matrix<float,3,4>>>
+    Calculate::GetCamPara_in(const shared_ptr<Calculate>& Cal_) const
+{
+    Eigen::Matrix<float,3,4>CamPara_in;
+    vector<Eigen::Matrix<float,3,4>> vec_camIn;
+    for(const auto &cam : Cal_->Cams)
+    {
+        CamPara_in<<cam->foclen_Equ[0], 0, cam->point_PicPrin[0], 0,
+                    0, cam->foclen_Equ[1], cam->point_PicPrin[1], 0,
+                    0, 0, 1, 0;
+        vec_camIn.push_back(CamPara_in);
+    }
+    return make_shared<vector<Eigen::Matrix<float,3,4>>>(vec_camIn);
+}
+
+shared_ptr<vector<Eigen::Matrix4f>>
+    Calculate::GetCamPara_out(const shared_ptr<Calculate>& Cal_) const
+{
+    Eigen::Matrix4f CamPara_out;
+    vector<Eigen::Matrix4f> vec_camOut;
+    for(const auto &cam : Cal_->Cams)
+    {
+    CamPara_out<<cam->rot_Mat(0,0), cam->rot_Mat(0,1), cam->rot_Mat(0,2), cam->tranT_Vec[0],
+                 cam->rot_Mat(1,0), cam->rot_Mat(1,1), cam->rot_Mat(1,2), cam->tranT_Vec[1],
+                 cam->rot_Mat(2,0), cam->rot_Mat(2,1), cam->rot_Mat(2,2), cam->tranT_Vec[2],
+                                 0,                 0,                 0,                 1;
+    vec_camOut.push_back(CamPara_out);
+    }
+    return make_shared<vector<Eigen::Matrix4f>>(vec_camOut);
+}
+
+void WorldPara::ComputePoint(const shared_ptr<Calculate>& WorldPara_)
+{
+    const auto camIn = WorldPara_->GetCamPara_in(WorldPara_);
+    const auto camOut = WorldPara_->GetCamPara_out(WorldPara_);
+    const auto point_World = WorldPara_->point_World;
+    auto bgIn = (*camIn).begin();
+    auto endIn = (*camIn).end();
+    auto bgOut = (*camOut).begin();
+
+}
 
 
 
@@ -319,7 +488,7 @@ void ShowResult_CP(shared_ptr<CollinearityEquation> p, ofstream &out)
     out<<"Pic Coordinate of opt: (~x,~y):\n"<<p->GetPoint_Pixo()<<"\n\n";
 }
 
-void ShowResult_CW(std::shared_ptr<CollinearityEquation> p1, std::shared_ptr<CollinearityEquation> p2, std::ofstream &out)
+void ShowResult_CW(shared_ptr<CollinearityEquation> p1, shared_ptr<CollinearityEquation> p2, std::ofstream &out)
 {
     cout<<"\n================result================\n";
     cout<<"Cam_1:\n";
