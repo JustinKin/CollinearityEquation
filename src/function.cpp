@@ -216,26 +216,30 @@ void WorldPara::ComputePoint(const shared_ptr<Calculate>& WorldPara_)
     auto bgIn = (*camIn).begin();
     // auto endIn = (*camIn).end();
     auto bgOut = (*camOut).begin();
-    auto bgPix = (this->point_Pixo).begin();
+    // auto bgPix = (this->point_Pixo).begin();
     // auto bgPw = point_World.begin();
     // TODO: check if a iter end of error before other's end()
     for(const auto &pw : point_World)
     {
-        cout<<"void WorldPara::ComputePoint1: \n"<<endl;
-        auto iter_pix = (*bgPix)->begin();
+        vector<Eigen::Vector2f> vec_pixo;
+        // cout<<"void WorldPara::ComputePoint1: \n"<<endl;
+        // auto iter_pix = (*bgPix)->begin();
         for(const auto &point : (*pw))
         {
-            cout<<"void WorldPara::ComputePoint2: \n"<<endl;
+            // cout<<"void WorldPara::ComputePoint2: \n"<<endl;
             Eigen::Vector4f point_World1(point[0], point[1], point[2], 1.0);
             Eigen::Vector3f tmp;
+            Eigen::Vector2f pixo;
             tmp = ((*bgIn) * (*bgOut) * point_World1);
-            (*iter_pix)[0] = tmp[0] / tmp[2];
-            (*iter_pix)[1] = tmp[1] / tmp[2];
-            ++iter_pix;
+            pixo[0] = tmp[0] / tmp[2];
+            pixo[1] = tmp[1] / tmp[2];
+            vec_pixo.push_back(pixo);
+            // ++iter_pix;
         }
+        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
         ++bgIn;
         ++bgOut;
-        ++bgPix;
+        // ++bgPix;
     }
 }
 
@@ -243,16 +247,18 @@ void WorldPara::ShowResult(const shared_ptr<Calculate>& WorldPara_, const string
 {
     string outfile(outfile_+"*.txt");
     cout<<"\n================Misson Completed================\n";
-    cout<<"Resoults saved in: \n"<<outfile<<"\n\n";
+    cout<<"Resoults saved in : "<<outfile<<"\n\n";
 
     const auto CamPara = WorldPara_->GetCamPara();
     auto CamPara_in = (*WorldPara_->CamPara_in).begin();
     auto CamPara_out = (*WorldPara_->CamPara_out).begin();
     auto bgPix = (this->point_Pixo).begin();
     // auto edPix = (this->point_Pixo).end();
+    int i = 1;
     for(const auto &cam : CamPara)
     {
-        cout<<"Pic Principle Coordinate: (Cx,Cy):\n"<<cam->point_PicPrin<<"\n\n"<<
+        ofstream out(outfile_ + to_string(i++) +".txt");
+        out<<"Pic Principle Coordinate: (Cx,Cy):\n"<<cam->point_PicPrin<<"\n\n"<<
               "Equivalent Focal Length: (Fx,Fy):\n" <<cam->foclen_Equ<<"\n\n"<<
               "Translation Vector: (Tx,Ty,Tz):\n"   <<cam->tranT_Vec<<"\n\n"<<
               "Rotation Matrix: (r0 ~ r8):\n"       <<cam->rot_Mat<<"\n\n"<<
@@ -261,11 +267,13 @@ void WorldPara::ShowResult(const shared_ptr<Calculate>& WorldPara_, const string
         auto results = (*bgPix);
         auto bgRes = (*results).begin();
         auto edRes = (*results).end();
+        out<<"Pic Coordinate of opt: (~x,~y):\n";
         for(;bgRes != edRes;++bgRes)
-            cout<<"Pic Coordinate of opt: (~x,~y):\n"<<*bgRes<<"\n\n";
+            out<<(*bgRes)[0]<<" "<<(*bgRes)[1]<<"\n";
         ++bgPix;
         ++CamPara_in;
         ++CamPara_out;
+        out.close();
     }
 
 }

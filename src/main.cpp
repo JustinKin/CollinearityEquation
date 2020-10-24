@@ -42,7 +42,6 @@ using namespace std;
                     p->ComputeCamPara_out();
                     worldpara.ComputePoint(p);
                     worldpara.ShowResult(p,result_pixo);
-
                 };
                 break;
             case 2:
