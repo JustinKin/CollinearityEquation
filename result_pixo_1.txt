@@ -29,4 +29,4 @@ Parameters_out:
 
 Pic Coordinate of opt: (~x,~y):
 2000 2000
-1680 1744
+1866.67 1955.56

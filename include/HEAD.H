@@ -42,8 +42,8 @@ public:
     std::shared_ptr<std::vector<Eigen::Matrix<float,3,4>>> CamPara_in;
     std::shared_ptr<std::vector<Eigen::Matrix4f>> CamPara_out;
     std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
-    virtual void ComputeCamPara_in() ;
-    virtual void ComputeCamPara_out() ;
+    virtual void ComputeCamPara_in();
+    virtual void ComputeCamPara_out();
 
 private:
     //read a list of txt for Initialize
@@ -62,8 +62,8 @@ class WorldPara : public Calculate
 friend class Calculate;
 public:
     WorldPara() = default;
-    WorldPara(  std::vector<std::shared_ptr<CamPara>> Cams_,
-                std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>>& point_World_);
+    // WorldPara(  std::vector<std::shared_ptr<CamPara>> Cams_,
+    //             std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>>& point_World_);
     std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> GetWorldCoordinate() const { return point_World; }
     void Initialize(std::shared_ptr<Calculate> WorldPara_,const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate>& WorldPara_) override;
@@ -75,7 +75,6 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> point_World;
     // the result is Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
-
 };
 
 class PicPara_opt : public Calculate
@@ -83,8 +82,8 @@ class PicPara_opt : public Calculate
 friend class Calculate;
 public:
     PicPara_opt() = default;
-    PicPara_opt(std::vector<std::shared_ptr<CamPara>> Cams_,
-                std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>>& point_Pixo_);
+    // PicPara_opt(std::vector<std::shared_ptr<CamPara>> Cams_,
+    //             std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>>& point_Pixo_);
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> GetPicoCoordinate() const { return point_Pixo; }
     void Initialize(std::shared_ptr<Calculate> PicPara_opt_,const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate>& PicPara_opt_) override;
@@ -95,8 +94,7 @@ private:
     // Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
     // the result is World Coordinate: (X,Y,Z)
-    std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> point_World;
-
+    std::vector<Eigen::Vector3f> point_World;
 };
 
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);

@@ -2,7 +2,6 @@
 #include<memory>
 #include<vector>
 #include<string>
-#include <chrono>
 #include <sstream>
 #include <fstream>
 #include<D:/QinJunyou/C/Eigen3/Eigen/Eigen>
@@ -24,9 +23,9 @@ Calculate::Calculate(vector<shared_ptr<CamPara>> Cams_) : Cams(Cams_) {}
 // Calculate::Calculate(vector<shared_ptr<CamPara>> Cams_,
 //             vector<shared_ptr<vector<Eigen::Vector2f>>> point_Pixo_) : Cams(Cams_), point_Pixo(point_Pixo_) {}
 
-WorldPara::WorldPara(vector<shared_ptr<CamPara>> Cams_,
-                     vector<shared_ptr<vector<Eigen::Vector3f>>>& point_World_) :
-    Calculate::Calculate(Cams_),point_World(point_World_){}
+// WorldPara::WorldPara(vector<shared_ptr<CamPara>> Cams_,
+//                      vector<shared_ptr<vector<Eigen::Vector3f>>>& point_World_) :
+//     Calculate::Calculate(Cams_),point_World(point_World_){}
 
 void WorldPara::Initialize(std::shared_ptr<Calculate> WorldPara_,const string &file_)
 {
@@ -275,13 +274,190 @@ void WorldPara::ShowResult(const shared_ptr<Calculate>& WorldPara_, const string
         ++CamPara_out;
         out.close();
     }
-
 }
 
+void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_,const string &file_)
+{
+    // cout<<"\nWorldPara::Initialize\n";
+    auto files = ReadFiles(file_);
+    string str("Pic Coordinate of opt: (~x,~y)");
+    CheckData(files,str);
+    // vector<shared_ptr<CamPara>> Cams;
+    for(const auto &eachfile : files)
+    {
+        Eigen::Vector2f point_PicPrin;
+        Eigen::Vector2f foclen_Equ;
+        Eigen::Vector3f tranT_Vec;
+        Eigen::Matrix3f rot_Mat;
+        // vector<shared_ptr<vector<Eigen::Vector3f>>> point_World;
+        string line;
+        for(int i = 1 ;i <12; i += 2)
+        {
+            istringstream iss((*eachfile)[i]);
+            string s;
+            // TODO: sepatrate case 1,3,5,7 to a individual function
+            switch(i)
+                {
+                    case 1:
+                        {
+                            int j = 0;
+                            while(iss >>s)
+                                point_PicPrin[j++] = stof(s);
+                        };
+                        break;
+                    case 3:
+                        {
+                            int j = 0;
+                            while(iss >>s)
+                                foclen_Equ[j++] = stof(s);
+                        };
+                        break;
+                    case 5:
+                        {
+                            int j = 0;
+                            while(iss >>s)
+                                tranT_Vec[j++] = stof(s);
+                        };
+                        break;
+                    case 7:
+                        {
+                            int c = 0;
+                            while(iss >>s)
+                                rot_Mat(0,c++) = stof(s);
+                            for(int j = 1; j <3; ++j)
+                            {
+                                istringstream is((*eachfile)[++i]);
+                                string s;
+                                int k = 0;
+                                while(is >>s)
+                                    rot_Mat(j,k++) = stof(s);
+                            }
+                        };
+                        break;
+                    case 11:
+                        {
+                            Eigen::Vector2f point;
+                            vector<Eigen::Vector2f> vec_point;
+                            auto bg = (*eachfile).begin() + 11;
+                            auto end = (*eachfile).end();
+                            for( ; bg != end; ++bg)
+                            {
+                                istringstream is(*bg);
+                                string s;
+                                int j = 0;
+                                while(is >> s)
+                                    point[j++] = stof(s);
+                                // cout<<"vec_point.push_back(point):\n "<<point<<endl;
+                                vec_point.push_back(point);
+                            }
+                            //  cout<<"vec_point.push_back(point): "<<vec_point.size()<<endl;
+                            this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_point));
+                        };
+                        break;
+                    default:
+                        {
+                            cerr<<"read error!\n";
+                        }
+                        break;
+                }
+        }
+        PicPara_opt_->Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin,foclen_Equ,tranT_Vec,rot_Mat)));
+    }
+    // return make_shared<WorldPara>(WorldPara(Cams,point_World));
+}
 
+void PicPara_opt::ComputePoint(const shared_ptr<Calculate>& PicPara_opt_)
+{
+    const int piontsNo = ((this->point_Pixo)[0])->size();
+    auto CamPara = PicPara_opt_->GetCamPara();
+    auto bgCam = CamPara.begin();
+    const auto point_Pixo = this->point_Pixo;
+cout<<"void point_Pixo::ComputePoint0: \n"<<point_Pixo.size()<<endl;
+    // TODO: check if a iter end of error before other's end()
+    //TODO:multiple cameras more than 2,RANCSAC?
+    //equations rows = cameras * 2
+    const int cams = CamPara.size();//
+    for(int count = 0 ;count <piontsNo; ++count)
+    {
+        Eigen::Matrix<float,Eigen::Dynamic,3> A_initial;
+        Eigen::VectorXf B_initial;
+        int row =0;
+        for(const auto &pixs : point_Pixo)
+        {
+            const auto &Cxy = (*bgCam)->point_PicPrin;
+            const auto &Fxy = (*bgCam)->foclen_Equ;
+            const auto &Txyz = (*bgCam)->tranT_Vec;
+            const auto &r = (*bgCam)->rot_Mat;
+        cout<<"void point_Pixo::ComputePoint1: \n"<<endl;
+            const auto point = (*pixs)[count];
+            float a = (point[0] - Cxy[0]);
+            float b = (point[1] - Cxy[1]);
+        cout<<"void point_Pixo::ComputePoint1.5: \n"<<endl;
+            for(int i = 0; i <3; ++i)
+            {
+            cout<<"void point_Pixo::ComputePoint1.8: \n"<<endl;
+                A_initial(row,i) = a * r(2,i) - Fxy[0] * r(0,i);
+            cout<<"void point_Pixo::ComputePoint1.9: \n"<<endl;
+                A_initial(row+1,i) = b * r(2,i) - Fxy[1] * r(1,i);
+            cout<<"void point_Pixo::ComputePoint2: \n"<<endl;
+            }
+            B_initial[row++] = Fxy[0] * Txyz[0] - a * Txyz[2];
+            B_initial[row++] = Fxy[1] * Txyz[1] - b * Txyz[2];
+            ++bgCam;
+        }
+        Eigen::Vector3f world;
+/*         Eigen::Matrix<float,3,Eigen::Dynamic> AT = A_initial.transpose();
+        Eigen::Matrix3f A = AT * A_initial;
+        Eigen::Vector3f B = AT * B_initial;
+        float D_A = A.determinant();
+        for(int j = 0; j <3; ++j)
+        {
+            Eigen::Matrix3f tmp = A;
+            tmp(0,j) = B[0];
+            tmp(1,j) = B[1];
+            tmp(2,j) = B[2];
+            world[j] = (tmp.determinant()) / D_A;
+        }
+ */        this->point_World.push_back(world);
+    }
+}
 
+void PicPara_opt::ShowResult(const shared_ptr<Calculate>& PicPara_opt_, const string &outfile_)
+{
+    string outfile(outfile_+"*.txt");
+    cout<<"\n================Misson Completed================\n";
+    cout<<"Resoults saved in : "<<outfile<<"\n\n";
 
+    const auto CamPara = PicPara_opt_->GetCamPara();
+    auto CamPara_in = (*PicPara_opt_->CamPara_in).begin();
+    auto CamPara_out = (*PicPara_opt_->CamPara_out).begin();
+    // auto bgWorld = (this->point_World).begin();
+    int i = 1;
+    ofstream out(outfile_ +".txt");
+    for(const auto &cam : CamPara)
+    {
+        out<<"Camera : "<<i++<<"\n";
+        out<<"Pic Principle Coordinate: (Cx,Cy):\n"<<cam->point_PicPrin<<"\n"
+           <<"Equivalent Focal Length: (Fx,Fy):\n" <<cam->foclen_Equ<<"\n"
+           <<"Translation Vector: (Tx,Ty,Tz):\n"   <<cam->tranT_Vec<<"\n"
+           <<"Rotation Matrix: (r0 ~ r8):\n"       <<cam->rot_Mat<<"\n"
+           <<"Parameters_in:\n"  <<(*CamPara_in)<<"\n"
+           <<"Parameters_out:\n" <<(*CamPara_out)<<"\n\n";
+        ++CamPara_in;
+        ++CamPara_out;
+    }
+    out<<"World Coordinate: (X,Y,Z):\n";
+    for(const auto & world : (this->point_World))
+        out<<world[0]<<" "<<world[1]<<" "<<world[2]<<"\n";
+/*         auto results = (*bgWorld);
+        auto bgRes = (*results).begin();
+        auto edRes = (*results).end();
+        for(;bgRes != edRes;++bgRes)
+            out<<(*bgRes)[0]<<" "<<(*bgRes)[1]<<" "<<(*bgRes)[2]<<"\n";
+        ++bgWorld;
+ */        out.close();
 
+}
 
 
 

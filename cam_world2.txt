@@ -10,6 +10,7 @@ Rotation Matrix: (r0 ~ r8)
 0 0 1
 World Coordinate: (X,Y,Z)
 100 100 100
+150 150 150
 200 200 200
 100 120 200
 111 222 200
