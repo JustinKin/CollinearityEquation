@@ -19,8 +19,8 @@ using namespace std;
     cout << "  Mission Start:  \n\n";
     auto start = chrono::high_resolution_clock::now();
 // =============================================================================
-    string  ComputePoint_Pixo("cam_w"),
-            ComputePoint_World("cam_p"),
+    string  ComputePoint_Pixo("cam_world"),
+            ComputePoint_World("cam_pix"),
             result_pixo("result_pixo_"),
             result_world("result_world_");
     WorldPara worldpara;
