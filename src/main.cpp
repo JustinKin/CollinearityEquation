@@ -18,7 +18,7 @@ int main(int argc,char *argv[])
             result_world("result_world");
     int choice;
  BG:
-    cout << "=======================================\n";
+    cout << "==========================================\n";
     cout << "1.Compute Pic Coordinate of opt: (~x,~y)\n";
     cout << "2.Compute World Coordinate: (X,Y,Z):\n";
     cout << "3.EXIT\n\n";
