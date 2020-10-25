@@ -1,8 +1,8 @@
 #ifndef __HEAD_H
 #define __HEAD_H
-#include<iostream>
-#include<memory>
-#include<D:/QinJunyou/C/Eigen3/Eigen/Eigen>
+#include <iostream>
+#include <memory>
+#include <D:/QinJunyou/C/Eigen3/Eigen/Eigen>
 
 class WorldPara;
 class PicPara_opt;
@@ -10,10 +10,10 @@ class CamPara
 {
 public:
     CamPara() = default;
-    CamPara(Eigen::Vector2f& point_PicPrin_,
-            Eigen::Vector2f& foclen_Equ_,
-            Eigen::Vector3f& tranT_Vec_,
-            Eigen::Matrix3f& rot_Mat_);
+    CamPara(Eigen::Vector2f &point_PicPrin_,
+            Eigen::Vector2f &foclen_Equ_,
+            Eigen::Vector3f &tranT_Vec_,
+            Eigen::Matrix3f &rot_Mat_);
     ~CamPara() = default;
 
     // Pic Principle Coordinate: (Cx,Cy)
@@ -35,7 +35,7 @@ public:
 
     // parameters of cameras
     std::vector<std::shared_ptr<CamPara>> Cams;
-    std::shared_ptr<std::vector<Eigen::Matrix<float,3,4>>> CamPara_in;
+    std::shared_ptr<std::vector<Eigen::Matrix<float, 3, 4>>> CamPara_in;
     std::shared_ptr<std::vector<Eigen::Matrix4f>> CamPara_out;
     std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
     virtual void ComputeCamPara_in();
@@ -43,22 +43,23 @@ public:
 
 private:
     //read a list of txt for Initialize
-    virtual void Initialize(std::shared_ptr<Calculate>,const std::string &file_) =0;
+    virtual void Initialize(std::shared_ptr<Calculate>, const std::string &file_) = 0;
     //multiple cameras
-    virtual void ComputePoint(const std::shared_ptr<Calculate>&) = 0;
+    virtual void ComputePoint(const std::shared_ptr<Calculate> &) = 0;
     //save and show results
-    virtual void ShowResult(const std::shared_ptr<Calculate>&, const std::string &outfile_) = 0;
+    virtual void ShowResult(const std::shared_ptr<Calculate> &, const std::string &outfile_) = 0;
 };
 
 class WorldPara : public Calculate
 {
-friend class Calculate;
+    friend class Calculate;
+
 public:
     WorldPara() = default;
     std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> GetWorldCoordinate() const { return point_World; }
-    void Initialize(std::shared_ptr<Calculate> WorldPara_,const std::string &file_) override;
-    void ComputePoint(const std::shared_ptr<Calculate>& WorldPara_) override;
-    void ShowResult(const std::shared_ptr<Calculate>& WorldPara_, const std::string &outfile_) override;
+    void Initialize(std::shared_ptr<Calculate> WorldPara_, const std::string &file_) override;
+    void ComputePoint(const std::shared_ptr<Calculate> &WorldPara_) override;
+    void ShowResult(const std::shared_ptr<Calculate> &WorldPara_, const std::string &outfile_) override;
     ~WorldPara() = default;
 
 private:
@@ -70,13 +71,14 @@ private:
 
 class PicPara_opt : public Calculate
 {
-friend class Calculate;
+    friend class Calculate;
+
 public:
     PicPara_opt() = default;
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> GetPicoCoordinate() const { return point_Pixo; }
-    void Initialize(std::shared_ptr<Calculate> PicPara_opt_,const std::string &file_) override;
-    void ComputePoint(const std::shared_ptr<Calculate>& PicPara_opt_) override;
-    void ShowResult(const std::shared_ptr<Calculate>& PicPara_opt_, const std::string &outfile_) override;
+    void Initialize(std::shared_ptr<Calculate> PicPara_opt_, const std::string &file_) override;
+    void ComputePoint(const std::shared_ptr<Calculate> &PicPara_opt_) override;
+    void ShowResult(const std::shared_ptr<Calculate> &PicPara_opt_, const std::string &outfile_) override;
     ~PicPara_opt() = default;
 
 private:
@@ -87,8 +89,6 @@ private:
 };
 
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);
-void CheckData(std::vector<std::shared_ptr<std::vector<std::string>>> file_ , const std::string &str_) ;
-
-
+void CheckData(std::vector<std::shared_ptr<std::vector<std::string>>> file_, const std::string &str_);
 
 #endif
