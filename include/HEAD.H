@@ -28,18 +28,21 @@ public:
 
 class Calculate
 {
+
 public:
     Calculate() = default;
     Calculate(std::vector<std::shared_ptr<CamPara>> Cams_);
     virtual ~Calculate() = default;
 
+    std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
+    virtual void ComputeCamPara_in();
+    virtual void ComputeCamPara_out();
+
+// protected:
     // parameters of cameras
     std::vector<std::shared_ptr<CamPara>> Cams;
     std::shared_ptr<std::vector<Eigen::Matrix<float, 3, 4>>> CamPara_in;
     std::shared_ptr<std::vector<Eigen::Matrix4f>> CamPara_out;
-    std::vector<std::shared_ptr<CamPara>> GetCamPara() const { return Cams; }
-    virtual void ComputeCamPara_in();
-    virtual void ComputeCamPara_out();
 
 private:
     //read a list of txt for Initialize
@@ -104,6 +107,10 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> point_World;
     // Pic Coordinate of real: (x,y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
+    // Pic Coordinate of opt: (~x,~y)
+    std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
+    // Aberration coefficients:（k0~k4）
+    std::shared_ptr<std::vector<Eigen::Vector4f>> coe_Aberr;
 };
 
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);

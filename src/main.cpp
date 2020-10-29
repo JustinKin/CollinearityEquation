@@ -58,8 +58,8 @@ BG:
             calibration.Initialize(p, ComputePoint_Calibration);
             // p->ComputeCamPara_in();
             // p->ComputeCamPara_out();
-            // calibration.ComputePoint(p);
-            // calibration.ShowResult(p, result_world);
+            calibration.ComputePoint(p);
+            calibration.ShowResult(p, result_calibration);
         }
         break;
 

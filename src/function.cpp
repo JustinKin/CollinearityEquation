@@ -412,10 +412,10 @@ void PicPara_opt::ShowResult(const shared_ptr<Calculate> &PicPara_opt_, const st
 
 void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const string &file_)
 {
-    cout<<"Please input noise of World coordinate : （0~0.005m）\n";
+    cout<<"Please input noise of World coordinate : (0 ~ 0.005m)\n";
     float noise_world;
     cin>> noise_world;
-    cout<<"Please input noise of Pix coordinate : （0~0.2pix）\n";
+    cout<<"Please input noise of Pix coordinate : (0 ~ 0.02pix)\n";
     float noise_pix;
     cin>> noise_pix;
 
@@ -444,6 +444,7 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
     for (const auto &eachfile : file_pix)
     {
         vector<Eigen::Vector2f> vec_Pix;
+        vector<Eigen::Vector2f> vec_Pixo;
         Eigen::Vector2f point_Pix;
         for(const auto &piont : (*eachfile))
         {
@@ -453,9 +454,86 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
             while(iss >> s)
                 point_Pix[i++] = stof(s) + p(e);
             vec_Pix.push_back(point_Pix);
+            vec_Pixo.push_back(point_Pix);
         }
         this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
+        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
     }
 
+
+}
+
+void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
+{
+    cout << "Calibration::ComputePoint : " << "\n\n";
+    // for each camera
+    for(;;)
+    {
+        unsigned rows = ((*((this->point_Pix)[0])).size()) * 2;//this->point_Pix)[i]
+        Eigen::MatrixXf K;
+        K.resize(rows,11);
+        Eigen::MatrixXf U;
+        U.resize(rows,1);
+        // iteration of solving k0 ~ k4
+        for(;;)
+        {
+            // Initialize K ,U
+            for(;;)
+            {
+
+            }
+            // solve s0 ~ s10
+            Eigen::MatrixXf KT;
+            KT.resize(11,rows);
+            KT = K.transpose();
+            Eigen::Matrix<float,11,11> a = KT * K;
+            Eigen::Matrix<float,11,1> b = KT * U;
+            Eigen::Matrix<float,11,1> s = a.lu().solve(b);
+            //  solve m0 ~ m11
+            // compute (~x,~y)
+            // compute k0 ~ k4
+            // fix Aberration
+
+        }
+    }
+
+}
+
+void Calibration::ShowResult(const shared_ptr<Calculate> &Calibration_, const string &outfile_)
+{
+    string outfile(outfile_ + ".txt");
+    cout << "\n================Misson Completed================\n";
+    cout << "Resoults saved in : " << outfile << "\n\n";
+    const auto CamPara = Calibration_->GetCamPara();
+    auto CamPara_in = (*Calibration_->CamPara_in).begin();
+    auto CamPara_out = (*Calibration_->CamPara_out).begin();
+    auto iter_coe_Aberr = (*(this->coe_Aberr)).begin();
+    int i = 1;
+    ofstream out(outfile_ + ".txt");
+    for (const auto &cam : CamPara)
+    {
+        out << "Camera : " << i++ << "\n";
+        out << "Pic Principle Coordinate: (Cx,Cy)\n"
+            << cam->point_PicPrin[0] << " " << cam->point_PicPrin[1] << "\n\n"
+            << "Equivalent Focal Length: (Fx,Fy)\n"
+            << cam->foclen_Equ[0] << " " << cam->foclen_Equ[1] << "\n\n"
+            << "Translation Vector: (Tx,Ty,Tz)\n"
+            << cam->tranT_Vec[0] << " " << cam->tranT_Vec[1] << " " << cam->tranT_Vec[2] << "\n\n"
+            << "Rotation Matrix: (r0 ~ r8)\n"
+            << cam->rot_Mat << "\n\n"
+            << "Parameters_in\n"
+            << (*CamPara_in) << "\n\n"
+            << "Parameters_out\n"
+            << (*CamPara_out) << "\n\n"
+            << "Aberration coefficients:（k0~k4）\n"
+            << (*iter_coe_Aberr)[0]<<" "<< (*iter_coe_Aberr)[1]<<" "<<(*iter_coe_Aberr)[2]<<" "
+            << (*iter_coe_Aberr)[3]<<" "<< (*iter_coe_Aberr)[4]<< "\n\n";
+
+        out << "==================================\n\n";
+        ++CamPara_in;
+        ++CamPara_out;
+        ++iter_coe_Aberr;
+    }
+    out.close();
 
 }
