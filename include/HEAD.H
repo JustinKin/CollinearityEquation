@@ -88,7 +88,24 @@ private:
     std::vector<Eigen::Vector3f> point_World;
 };
 
+class Calibration : public Calculate
+{
+    friend class Calculate;
+public:
+    Calibration() = default;
+    void Initialize(std::shared_ptr<Calculate> Calibration_, const std::string &file_) override;
+    void ComputePoint(const std::shared_ptr<Calculate> &Calibration_) override;
+    void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
+    ~Calibration() = default;
+
+
+private:
+    // World Coordinate: (X,Y,Z)
+    std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> point_World;
+    // Pic Coordinate of real: (x,y)
+    std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
+};
+
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);
 void CheckData(std::vector<std::shared_ptr<std::vector<std::string>>> file_, const std::string &str_);
-
 #endif

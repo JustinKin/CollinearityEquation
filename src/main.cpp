@@ -14,14 +14,17 @@ int main(int argc, char *argv[])
 {
     string ComputePoint_Pixo("cam_world"),
         ComputePoint_World("cam_pix"),
+        ComputePoint_Calibration("cali_"),
         result_pixo("result_pixo_"),
-        result_world("result_world");
+        result_world("result_world"),
+        result_calibration("result_calibration");
     int choice;
 BG:
     cout << "==========================================\n";
     cout << "1.Compute Pic Coordinate of opt: (~x,~y)\n";
     cout << "2.Compute World Coordinate: (X,Y,Z):\n";
-    cout << "3.EXIT\n\n";
+    cout << "3.Calibration:\n";
+    cout << "4.EXIT\n\n";
     while (cin >> choice)
     {
         switch (choice)
@@ -35,7 +38,7 @@ BG:
             p->ComputeCamPara_out();
             worldpara.ComputePoint(p);
             worldpara.ShowResult(p, result_pixo);
-        };
+        }
         break;
         case 2:
         {
@@ -46,8 +49,20 @@ BG:
             p->ComputeCamPara_out();
             picpara_opt.ComputePoint(p);
             picpara_opt.ShowResult(p, result_world);
-        };
+        }
         break;
+        case 3:
+        {
+            Calibration calibration;
+            auto p = make_shared<Calibration>(calibration);
+            calibration.Initialize(p, ComputePoint_Calibration);
+            // p->ComputeCamPara_in();
+            // p->ComputeCamPara_out();
+            // calibration.ComputePoint(p);
+            // calibration.ShowResult(p, result_world);
+        }
+        break;
+
         default:
         {
             return 0;

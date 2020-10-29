@@ -28,7 +28,7 @@ void WorldPara::Initialize(std::shared_ptr<Calculate> WorldPara_, const string &
         Eigen::Vector2f foclen_Equ;
         Eigen::Vector3f tranT_Vec;
         Eigen::Matrix3f rot_Mat;
-        string line;
+        // string line;
         for (int i = 1; i < 12; i += 2)
         {
             istringstream iss((*eachfile)[i]);
@@ -249,7 +249,7 @@ void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const stri
         Eigen::Vector2f foclen_Equ;
         Eigen::Vector3f tranT_Vec;
         Eigen::Matrix3f rot_Mat;
-        string line;
+        // string line;
         for (int i = 1; i < 12; i += 2)
         {
             istringstream iss((*eachfile)[i]);
@@ -405,4 +405,44 @@ void PicPara_opt::ShowResult(const shared_ptr<Calculate> &PicPara_opt_, const st
     for (const auto &world : (this->point_World))
         out << world[0] << " " << world[1] << " " << world[2] << "\n";
     out.close();
+}
+
+void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const string &file_)
+{
+    string cali_world(file_ + "world_");
+    string cali_pix(file_ + "pix_");
+    auto file_world = ReadFiles(cali_world);
+    for (const auto &eachfile : file_world)
+    {
+        vector<Eigen::Vector3f> vec_World;
+        Eigen::Vector3f point_World;
+        for(const auto &piont : (*eachfile))
+        {
+            istringstream iss(piont);
+            string s;
+            int i = 0;
+            while(iss >> s)
+                point_World[i++] = stof(s);
+            vec_World.push_back(point_World);
+        }
+        this->point_World.push_back(make_shared<vector<Eigen::Vector3f>>(vec_World));
+    }
+    auto file_pix = ReadFiles(cali_pix);
+    for (const auto &eachfile : file_pix)
+    {
+        vector<Eigen::Vector2f> vec_Pix;
+        Eigen::Vector2f point_Pix;
+        for(const auto &piont : (*eachfile))
+        {
+            istringstream iss(piont);
+            string s;
+            int i = 0;
+            while(iss >> s)
+                point_Pix[i++] = stof(s);
+            vec_Pix.push_back(point_Pix);
+        }
+        this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
+    }
+
+
 }
