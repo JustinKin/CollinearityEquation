@@ -421,8 +421,6 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
 
     default_random_engine e(time(0));
     normal_distribution<float> w(0,noise_world), p(0,noise_pix);
-    // for(int i = 0; i <10 ; ++i)
-    // cout<<u(e)<<" ";
 
     string cali_world(file_ + "world_");
     string cali_pix(file_ + "pix_");
