@@ -4,7 +4,10 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <random>
+#include <ctime>
 #include <D:/QinJunyou/C/Eigen3/Eigen/Eigen>
+#include<D:/QinJunyou/C/Eigen3/Eigen/LU>
 
 #include "HEAD.H"
 
@@ -409,6 +412,18 @@ void PicPara_opt::ShowResult(const shared_ptr<Calculate> &PicPara_opt_, const st
 
 void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const string &file_)
 {
+    cout<<"Please input noise of World coordinate : （0~0.005m）\n";
+    float noise_world;
+    cin>> noise_world;
+    cout<<"Please input noise of Pix coordinate : （0~0.2pix）\n";
+    float noise_pix;
+    cin>> noise_pix;
+
+    default_random_engine e(time(0));
+    normal_distribution<float> w(0,noise_world), p(0,noise_pix);
+    // for(int i = 0; i <10 ; ++i)
+    // cout<<u(e)<<" ";
+
     string cali_world(file_ + "world_");
     string cali_pix(file_ + "pix_");
     auto file_world = ReadFiles(cali_world);
@@ -422,7 +437,7 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
             string s;
             int i = 0;
             while(iss >> s)
-                point_World[i++] = stof(s);
+                point_World[i++] = stof(s) + w(e);
             vec_World.push_back(point_World);
         }
         this->point_World.push_back(make_shared<vector<Eigen::Vector3f>>(vec_World));
@@ -438,7 +453,7 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
             string s;
             int i = 0;
             while(iss >> s)
-                point_Pix[i++] = stof(s);
+                point_Pix[i++] = stof(s) + p(e);
             vec_Pix.push_back(point_Pix);
         }
         this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
