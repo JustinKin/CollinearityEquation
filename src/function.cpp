@@ -22,6 +22,23 @@ Calculate::Calculate(vector<shared_ptr<CamPara>> Cams_) : Cams(Cams_) {}
 
 void WorldPara::Initialize(std::shared_ptr<Calculate> WorldPara_, const string &file_)
 {
+    // read in coe_Aberration
+    string file_coeAberr("coe_Aberration");
+    auto files = ReadFiles(file_coeAberr);
+    Eigen::Matrix<float,5,1> coeAberr;
+    vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
+    // only a txt of coe_Aberration
+    for(const auto &coe : *(files[0]))
+    {
+        istringstream iss(coe);
+        string s;
+        int i = 0;
+        while(iss >> s)
+            coeAberr(i++,1) = stof(s);
+        vec_coeAberr.push_back(coeAberr);
+    }
+    WorldPara_->coe_Aberr = make_shared<vector<Eigen::Matrix<float,5,1>>>(vec_coeAberr);
+    // read in world parameters
     auto files = ReadFiles(file_);
     string str("World Coordinate: (X,Y,Z)");
     CheckData(files, str);
@@ -176,8 +193,15 @@ void Calculate::ComputeCamPara_out()
     this->CamPara_out = make_shared<vector<Eigen::Matrix4f>>(vec_camOut);
 }
 
+void WorldPara::FixAberration(const std::shared_ptr<Calculate> &WorldPara_)
+{
+// compute real (x,y) using k0 ~ k4
+
+}
+
 void WorldPara::ComputePoint(const shared_ptr<Calculate> &WorldPara_)
 {
+    FixAberration(WorldPara_);
     const auto camIn = WorldPara_->CamPara_in;
     const auto camOut = WorldPara_->CamPara_out;
     const auto point_World = this->point_World;
@@ -195,6 +219,7 @@ void WorldPara::ComputePoint(const shared_ptr<Calculate> &WorldPara_)
             pixo[0] = tmp[0] / tmp[2];
             pixo[1] = tmp[1] / tmp[2];
             vec_pixo.push_back(pixo);
+            // fix
         }
         this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
         ++bgIn;
@@ -243,6 +268,23 @@ void WorldPara::ShowResult(const shared_ptr<Calculate> &WorldPara_, const string
 
 void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const string &file_)
 {
+    // read in coe_Aberration
+    string file_coeAberr("coe_Aberration");
+    auto files = ReadFiles(file_coeAberr);
+    Eigen::Matrix<float,5,1> coeAberr;
+    vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
+    // only a txt of coe_Aberration
+    for(const auto &coe : *(files[0]))
+    {
+        istringstream iss(coe);
+        string s;
+        int i = 0;
+        while(iss >> s)
+            coeAberr(i++,1) = stof(s);
+        vec_coeAberr.push_back(coeAberr);
+    }
+    PicPara_opt_->coe_Aberr = make_shared<vector<Eigen::Matrix<float,5,1>>>(vec_coeAberr);
+    // read in PicPara_opt
     auto files = ReadFiles(file_);
     string str("Pic Coordinate of opt: (~x,~y)");
     CheckData(files, str);
@@ -323,6 +365,25 @@ void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const stri
         }
         PicPara_opt_->Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin, foclen_Equ, tranT_Vec, rot_Mat)));
     }
+}
+
+void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
+{
+    string file_("coe_Aberration");
+    auto files = ReadFiles(file_);
+    // only a txt of coe_Aberration
+    Eigen::Matrix<float,5,1> coeAberr;
+    vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
+    for(const auto &coe : *(files[0]))
+    {
+        istringstream iss(coe);
+        string s;
+        int i = 0;
+        while(iss >> s)
+            coeAberr(i++,1) = stof(s);
+        vec_coeAberr.push_back(coeAberr);
+    }
+    PicPara_opt_->coe_Aberr = make_shared<vector<Eigen::Matrix<float,5,1>>>(vec_coeAberr);
 }
 
 void PicPara_opt::ComputePoint(const shared_ptr<Calculate> &PicPara_opt_)

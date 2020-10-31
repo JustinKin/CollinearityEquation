@@ -12,12 +12,12 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    string ComputePoint_Pixo("cam_world"),
-        ComputePoint_World("cam_pix"),
-        ComputePoint_Calibration("cali_"),
-        result_pixo("result_pixo_"),
-        result_world("result_world"),
-        result_calibration("result_calibration");
+    string  ComputePoint_Pixo("cam_world"),
+            ComputePoint_World("cam_pix"),
+            ComputePoint_Calibration("cali_"),
+            result_pixo("result_pixo_"),
+            result_world("result_world"),
+            result_calibration("result_calibration");
     int choice;
 BG:
     cout << "==========================================\n";

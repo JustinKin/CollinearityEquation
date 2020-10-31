@@ -51,7 +51,7 @@ public:
     std::shared_ptr<std::vector<Eigen::Matrix<float, 3, 4>>> CamPara_in;
     std::shared_ptr<std::vector<Eigen::Matrix4f>> CamPara_out;
     // Aberration coefficients:（k0~k4）
-    std::shared_ptr<std::vector<Eigen::Vector4f>> coe_Aberr;
+    std::shared_ptr<std::vector<Eigen::Matrix<float,5,1>>> coe_Aberr;
 private:
     //read a list of txt for Initialize
     virtual void Initialize(std::shared_ptr<Calculate>, const std::string &file_) = 0;
@@ -73,6 +73,7 @@ public:
     void Initialize(std::shared_ptr<Calculate> WorldPara_, const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate> &WorldPara_) override;
     void ShowResult(const std::shared_ptr<Calculate> &WorldPara_, const std::string &outfile_) override;
+    void FixAberration(const std::shared_ptr<Calculate> &WorldPara_) override;
     ~WorldPara() = default;
 
 private:
@@ -94,6 +95,7 @@ public:
     void Initialize(std::shared_ptr<Calculate> PicPara_opt_, const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate> &PicPara_opt_) override;
     void ShowResult(const std::shared_ptr<Calculate> &PicPara_opt_, const std::string &outfile_) override;
+    void FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_) override;
     ~PicPara_opt() = default;
 
 private:
@@ -113,6 +115,7 @@ public:
     void Initialize(std::shared_ptr<Calculate> Calibration_, const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate> &Calibration_) override;
     void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
+    void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
     ~Calibration() = default;
 
 
