@@ -195,8 +195,35 @@ void Calculate::ComputeCamPara_out()
 
 void WorldPara::FixAberration(const std::shared_ptr<Calculate> &WorldPara_)
 {
-// compute real (x,y) using k0 ~ k4
-
+    // compute real (x,y) using k0 ~ k4
+    // k0 ~ k4 for each camera
+    auto bg_coeAb = (*(WorldPara_->coe_Aberr)).begin();
+    auto bg_Cams = (WorldPara_->Cams).begin();
+    for(const auto &eachfile : this->point_Pixo)
+    {
+        const auto &k0 = ((*bg_coeAb)(0,0));
+        const auto &k1 = ((*bg_coeAb)(1,0));
+        const auto &k2 = ((*bg_coeAb)(2,0));
+        const auto &k3 = ((*bg_coeAb)(3,0));
+        const auto &k4 = ((*bg_coeAb)(4,0));
+        const auto &Cx = ((*bg_Cams)->point_PicPrin[0]);
+        const auto &Cy = ((*bg_Cams)->point_PicPrin[1]);
+        const auto &Fx = ((*bg_Cams)->foclen_Equ[0]);
+        const auto &Fy = ((*bg_Cams)->foclen_Equ[1]);
+        vector<Eigen::Vector2f> vec_Pix;
+        for(const auto & point : (*eachfile))
+        {
+            float xd = (point[0] - Cx) / Fx;
+            float yd = (point[1] - Cy) / Fy;
+            float dt_x = xd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k1 + xd*xd*k3 + xd*yd*k4;
+            float dt_y = yd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k2 + xd*yd*k3 + yd*yd*k4;
+            Eigen::Vector2f point_pix(point[0] + dt_x, point[1] + dt_y);
+            vec_Pix.push_back(point_pix);
+        }
+        this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
+        ++bg_coeAb;
+        ++bg_Cams;
+    }
 }
 
 void WorldPara::ComputePoint(const shared_ptr<Calculate> &WorldPara_)
@@ -219,7 +246,6 @@ void WorldPara::ComputePoint(const shared_ptr<Calculate> &WorldPara_)
             pixo[0] = tmp[0] / tmp[2];
             pixo[1] = tmp[1] / tmp[2];
             vec_pixo.push_back(pixo);
-            // fix
         }
         this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
         ++bgIn;
@@ -369,21 +395,38 @@ void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const stri
 
 void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
 {
-    string file_("coe_Aberration");
-    auto files = ReadFiles(file_);
-    // only a txt of coe_Aberration
-    Eigen::Matrix<float,5,1> coeAberr;
-    vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
-    for(const auto &coe : *(files[0]))
+    // compute real (x,y) using k0 ~ k4
+    // k0 ~ k4 for each camera
+    auto bg_coeAb = (*(PicPara_opt_->coe_Aberr)).begin();
+    auto bg_Cams = (PicPara_opt_->Cams).begin();
+    for(const auto &eachfile : this->point_Pix)
     {
-        istringstream iss(coe);
-        string s;
-        int i = 0;
-        while(iss >> s)
-            coeAberr(i++,1) = stof(s);
-        vec_coeAberr.push_back(coeAberr);
+        const auto &k0 = ((*bg_coeAb)(0,0));
+        const auto &k1 = ((*bg_coeAb)(1,0));
+        const auto &k2 = ((*bg_coeAb)(2,0));
+        const auto &k3 = ((*bg_coeAb)(3,0));
+        const auto &k4 = ((*bg_coeAb)(4,0));
+        const auto &Cx = ((*bg_Cams)->point_PicPrin[0]);
+        const auto &Cy = ((*bg_Cams)->point_PicPrin[1]);
+        const auto &Fx = ((*bg_Cams)->foclen_Equ[0]);
+        const auto &Fy = ((*bg_Cams)->foclen_Equ[1]);
+        vector<Eigen::Vector2f> vec_Pixo;
+        for(const auto & point : (*eachfile))
+        {
+            for(;;)
+            {
+                float xd = (point[0] - Cx) / Fx;
+                float yd = (point[1] - Cy) / Fy;
+                float dt_x = xd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k1 + xd*xd*k3 + xd*yd*k4;
+                float dt_y = yd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k2 + xd*yd*k3 + yd*yd*k4;
+            }
+            Eigen::Vector2f point_pix(point[0] + dt_x, point[1] + dt_y);
+            vec_Pixo.push_back(point_pix);
+        }
+        this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
+        ++bg_coeAb;
+        ++bg_Cams;
     }
-    PicPara_opt_->coe_Aberr = make_shared<vector<Eigen::Matrix<float,5,1>>>(vec_coeAberr);
 }
 
 void PicPara_opt::ComputePoint(const shared_ptr<Calculate> &PicPara_opt_)

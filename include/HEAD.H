@@ -1,6 +1,6 @@
 /*
 TODO:
-1. void FixAberration for every class
+1. void FixAberration for PicPara_opt class
 
  */
 
