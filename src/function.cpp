@@ -478,9 +478,13 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
         for(;;)
         {
             // Initialize K ,U
-            for(;;)
+            // r = row
+            unsigned r = 0;
+            // c = col
+            unsigned c = 0;
+            for(; r < rows; ++r,++c)
             {
-
+                // Eigen::Vector4f
             }
             // solve s0 ~ s10
             Eigen::MatrixXf KT;

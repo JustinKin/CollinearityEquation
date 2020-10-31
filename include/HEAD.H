@@ -1,3 +1,10 @@
+/*
+TODO:
+1. void FixAberration for every class
+
+ */
+
+
 #ifndef __HEAD_H
 #define __HEAD_H
 #include <iostream>
@@ -43,12 +50,15 @@ public:
     std::vector<std::shared_ptr<CamPara>> Cams;
     std::shared_ptr<std::vector<Eigen::Matrix<float, 3, 4>>> CamPara_in;
     std::shared_ptr<std::vector<Eigen::Matrix4f>> CamPara_out;
-
+    // Aberration coefficients:（k0~k4）
+    std::shared_ptr<std::vector<Eigen::Vector4f>> coe_Aberr;
 private:
     //read a list of txt for Initialize
     virtual void Initialize(std::shared_ptr<Calculate>, const std::string &file_) = 0;
     //multiple cameras
     virtual void ComputePoint(const std::shared_ptr<Calculate> &) = 0;
+    // fix Aberration
+    virtual void FixAberration(const std::shared_ptr<Calculate> &) = 0;
     //save and show results
     virtual void ShowResult(const std::shared_ptr<Calculate> &, const std::string &outfile_) = 0;
 };
@@ -70,6 +80,8 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector3f>>> point_World;
     // the result is Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
+    // Pic Coordinate of real: (x,y)
+    std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
 };
 
 class PicPara_opt : public Calculate
@@ -87,6 +99,8 @@ public:
 private:
     // Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
+    // Pic Coordinate of real: (x,y)
+    std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
     // the result is World Coordinate: (X,Y,Z)
     std::vector<Eigen::Vector3f> point_World;
 };
@@ -109,8 +123,7 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
     // Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
-    // Aberration coefficients:（k0~k4）
-    std::shared_ptr<std::vector<Eigen::Vector4f>> coe_Aberr;
+
 };
 
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);
