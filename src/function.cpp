@@ -593,8 +593,9 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
 void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 {
     cout << "Calibration::ComputePoint : " << "\n\n";
-    // for each camera
-    for(;;)
+    // for each camera, each "cali_pix_*.txt" corresponding to a camera
+    // each camera corresponding to a group coe_Aberration
+    for(const auto& eachfile : (this->point_Pix))
     {
         unsigned rows = ((*((this->point_Pix)[0])).size()) * 2;//this->point_Pix)[i]
         Eigen::MatrixXf K;
@@ -602,16 +603,26 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
         Eigen::MatrixXf U;
         U.resize(rows,1);
         // iteration of solving k0 ~ k4
+        auto bg_worldpoint = ((this->point_World)[0])->begin();
+        auto bg_pixpiont = eachfile->begin();
         for(;;)
         {
             // Initialize K ,U
             // r = row
             unsigned r = 0;
             // c = col
-            unsigned c = 0;
-            for(; r < rows; ++r,++c)
+            // unsigned c = 0;
+            for(; r < rows; )
             {
                 // Eigen::Vector4f
+                const auto& worldpoint = *bg_worldpoint;
+                const auto& pixpoint = *bg_pixpiont;
+                Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
+                Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
+                K.row(r++) = (XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose());
+                K.row(r++) = (ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose());
+                ++bg_worldpoint;
+                ++bg_pixpiont;
             }
             // solve s0 ~ s10
             Eigen::MatrixXf KT;
