@@ -48,7 +48,7 @@ BG:
             picpara_opt.Initialize(p, ComputePoint_World);
             p->ComputeCamPara_in();
             p->ComputeCamPara_out();
-            // picpara_opt.FixAberration(p);
+            picpara_opt.FixAberration(p);
             picpara_opt.ComputePoint(p);
             picpara_opt.ShowResult(p, result_world);
         }

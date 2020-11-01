@@ -6,6 +6,7 @@
 #include <fstream>
 #include <random>
 #include <ctime>
+// #include <cmath>
 #include <D:/QinJunyou/C/Eigen3/Eigen/Eigen>
 #include<D:/QinJunyou/C/Eigen3/Eigen/LU>
 
@@ -23,18 +24,18 @@ Calculate::Calculate(vector<shared_ptr<CamPara>> Cams_) : Cams(Cams_) {}
 void WorldPara::Initialize(std::shared_ptr<Calculate> WorldPara_, const string &file_)
 {
     // read in coe_Aberration
-    string file_coeAberr("coe_Aberration");
-    auto files = ReadFiles(file_coeAberr);
+    string file_coeAberr("coe_Aberration_");
+    auto files_Ab = ReadFiles(file_coeAberr);
     Eigen::Matrix<float,5,1> coeAberr;
     vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
     // only a txt of coe_Aberration
-    for(const auto &coe : *(files[0]))
-    {
+    for(const auto &coe : *(files_Ab[0]))
+    {cout << "= = "<<endl;
         istringstream iss(coe);
         string s;
         int i = 0;
         while(iss >> s)
-            coeAberr(i++,1) = stof(s);
+            coeAberr(i++,0) = stof(s);
         vec_coeAberr.push_back(coeAberr);
     }
     WorldPara_->coe_Aberr = make_shared<vector<Eigen::Matrix<float,5,1>>>(vec_coeAberr);
@@ -295,24 +296,24 @@ void WorldPara::ShowResult(const shared_ptr<Calculate> &WorldPara_, const string
 void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const string &file_)
 {
     // read in coe_Aberration
-    string file_coeAberr("coe_Aberration");
-    auto files = ReadFiles(file_coeAberr);
+    string file_coeAberr("coe_Aberration_");
+    auto files_Ab = ReadFiles(file_coeAberr);
     Eigen::Matrix<float,5,1> coeAberr;
     vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
     // only a txt of coe_Aberration
-    for(const auto &coe : *(files[0]))
+    for(const auto &coe : *(files_Ab[0]))
     {
         istringstream iss(coe);
         string s;
         int i = 0;
         while(iss >> s)
-            coeAberr(i++,1) = stof(s);
+            coeAberr(i++,0) = stof(s);
         vec_coeAberr.push_back(coeAberr);
     }
     PicPara_opt_->coe_Aberr = make_shared<vector<Eigen::Matrix<float,5,1>>>(vec_coeAberr);
-    // read in PicPara_opt
+    // read in PicPara_pix
     auto files = ReadFiles(file_);
-    string str("Pic Coordinate of opt: (~x,~y)");
+    string str("Pic Coordinate of pix: (x,y)");
     CheckData(files, str);
     for (const auto &eachfile : files)
     {
@@ -379,7 +380,7 @@ void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const stri
                         point[j++] = stof(s);
                     vec_point.push_back(point);
                 }
-                this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_point));
+                this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_point));
             };
             break;
             default:
@@ -399,6 +400,8 @@ void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
     // k0 ~ k4 for each camera
     auto bg_coeAb = (*(PicPara_opt_->coe_Aberr)).begin();
     auto bg_Cams = (PicPara_opt_->Cams).begin();
+    const unsigned iter_max = 100;
+    const double residual = 1e-10;
     for(const auto &eachfile : this->point_Pix)
     {
         const auto &k0 = ((*bg_coeAb)(0,0));
@@ -413,17 +416,37 @@ void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
         vector<Eigen::Vector2f> vec_Pixo;
         for(const auto & point : (*eachfile))
         {
-            for(;;)
+            float x_tmp = point[0];
+            float y_tmp = point[1];
+            float xd = (x_tmp - Cx) / Fx;
+            float yd = (y_tmp - Cy) / Fy;
+            float dt_x_bef = xd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k1 + xd*xd*k3 + xd*yd*k4;
+            float dt_y_bef = yd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k2 + xd*yd*k3 + yd*yd*k4;
+            unsigned iter = 0;
+            for(;iter < iter_max; ++iter)
             {
-                float xd = (point[0] - Cx) / Fx;
-                float yd = (point[1] - Cy) / Fy;
+                x_tmp = point[0] - dt_x_bef;
+                y_tmp = point[1] - dt_y_bef;
+                xd = (x_tmp - Cx) / Fx;
+                yd = (y_tmp - Cy) / Fy;
                 float dt_x = xd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k1 + xd*xd*k3 + xd*yd*k4;
                 float dt_y = yd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k2 + xd*yd*k3 + yd*yd*k4;
+                double res_x = abs(dt_x - dt_x_bef);
+                double res_y = abs(dt_y - dt_y_bef);
+                if(res_x < residual && res_y <residual)
+                    break;
+                else
+                {
+                    dt_x_bef = dt_x;
+                    dt_y_bef = dt_y;
+                }
+
             }
-            Eigen::Vector2f point_pix(point[0] + dt_x, point[1] + dt_y);
-            vec_Pixo.push_back(point_pix);
+            cout<<"unsigned iter ="<<iter<<endl;
+            Eigen::Vector2f pixo(x_tmp, y_tmp);
+            vec_Pixo.push_back(pixo);
         }
-        this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
+        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
         ++bg_coeAb;
         ++bg_Cams;
     }
@@ -548,20 +571,20 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
     for (const auto &eachfile : file_pix)
     {
         vector<Eigen::Vector2f> vec_Pix;
-        vector<Eigen::Vector2f> vec_Pixo;
-        Eigen::Vector2f point_Pix;
+        // vector<Eigen::Vector2f> vec_Pixo;
+        Eigen::Vector2f point;
         for(const auto &piont : (*eachfile))
         {
             istringstream iss(piont);
             string s;
             int i = 0;
             while(iss >> s)
-                point_Pix[i++] = stof(s) + p(e);
-            vec_Pix.push_back(point_Pix);
-            vec_Pixo.push_back(point_Pix);
+                point[i++] = stof(s) + p(e);
+            vec_Pix.push_back(point);
+            // vec_Pixo.push_back(point_Pix);
         }
         this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
-        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
+        // this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
     }
 
 
@@ -604,6 +627,12 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 
         }
     }
+
+}
+
+void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
+{
+    cout << "Calibration::FixAberration : " << "\n\n";
 
 }
 

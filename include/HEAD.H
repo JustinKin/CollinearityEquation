@@ -1,7 +1,7 @@
 /*
 TODO:
-1. void FixAberration for PicPara_opt class
-
+1. void FixAberration for cali class
+2. add noise for forward 2 class
  */
 
 
