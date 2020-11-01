@@ -30,7 +30,8 @@ void WorldPara::Initialize(std::shared_ptr<Calculate> WorldPara_, const string &
     vector<Eigen::Matrix<float,5,1>> vec_coeAberr;
     // only a txt of coe_Aberration
     for(const auto &coe : *(files_Ab[0]))
-    {cout << "= = "<<endl;
+    {
+        // cout << "= = "<<endl;
         istringstream iss(coe);
         string s;
         int i = 0;
@@ -263,7 +264,8 @@ void WorldPara::ShowResult(const shared_ptr<Calculate> &WorldPara_, const string
     const auto CamPara = WorldPara_->GetCamPara();
     auto CamPara_in = (*WorldPara_->CamPara_in).begin();
     auto CamPara_out = (*WorldPara_->CamPara_out).begin();
-    auto bgPix = (this->point_Pixo).begin();
+    auto bgPixo = (this->point_Pixo).begin();
+    auto bgPix = (this->point_Pix).begin();
     int i = 1;
     for (const auto &cam : CamPara)
     {
@@ -280,12 +282,19 @@ void WorldPara::ShowResult(const shared_ptr<Calculate> &WorldPara_, const string
             << (*CamPara_in) << "\n\n"
             << "Parameters_out:\n"
             << (*CamPara_out) << "\n\n";
+        auto results_o = (*bgPixo);
+        auto bgRes_o = (*results_o).begin();
+        auto edRes_o = (*results_o).end();
+        out << "Pic Coordinate of opt: (~x,~y):\n";
+        for (; bgRes_o != edRes_o; ++bgRes_o)
+            out << (*bgRes_o)[0] << " " << (*bgRes_o)[1] << "\n";
         auto results = (*bgPix);
         auto bgRes = (*results).begin();
         auto edRes = (*results).end();
-        out << "Pic Coordinate of opt: (~x,~y):\n";
+        out << "\nPic Coordinate of real: (x,y):\n";
         for (; bgRes != edRes; ++bgRes)
             out << (*bgRes)[0] << " " << (*bgRes)[1] << "\n";
+        ++bgPixo;
         ++bgPix;
         ++CamPara_in;
         ++CamPara_out;
@@ -610,17 +619,16 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             // Initialize K ,U
             // r = row
             unsigned r = 0;
-            // c = col
-            // unsigned c = 0;
+            const auto& worldpoint = *bg_worldpoint;
+            const auto& pixpoint = *bg_pixpiont;
             for(; r < rows; )
             {
-                // Eigen::Vector4f
-                const auto& worldpoint = *bg_worldpoint;
-                const auto& pixpoint = *bg_pixpiont;
                 Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
                 Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
-                K.row(r++) = (XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose());
-                K.row(r++) = (ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose());
+                K.row(r) = (XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose());
+                U(r++,0) = pixpoint[0];
+                K.row(r) = (ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose());
+                U(r++,0) = pixpoint[1];
                 ++bg_worldpoint;
                 ++bg_pixpiont;
             }

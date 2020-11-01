@@ -2,6 +2,7 @@
 TODO:
 1. void FixAberration for cali class
 2. add noise for forward 2 class
+3. seems nothing change in picpara_opt.ShowResult after FixAberration
  */
 
 
