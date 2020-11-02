@@ -6,7 +6,7 @@
 #include <fstream>
 #include <random>
 #include <ctime>
-// #include <cmath>
+#include <cmath>
 #include <D:/QinJunyou/C/Eigen3/Eigen/Eigen>
 #include<D:/QinJunyou/C/Eigen3/Eigen/LU>
 
@@ -593,7 +593,8 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
             // vec_Pixo.push_back(point_Pix);
         }
         this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
-        // this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
+        // using pix of real as piox for the first time of iteration
+        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
     }
 
 
@@ -612,6 +613,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
         Eigen::MatrixXf U;
         U.resize(rows,1);
         auto bg_worldpoint = ((this->point_World)[0])->begin();
+        auto bg_pixo = (this->point_Pixo).begin();//2020.11.02
         // auto ed_worldpoint = ((this->point_World)[0])->end();
         auto bg_pixpiont = eachfile->begin();
         // iteration of solving k0 ~ k4
@@ -644,7 +646,30 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             Eigen::Matrix<float,11,1> b = KT * U;
             Eigen::Matrix<float,11,1> s = a.lu().solve(b);
             //  solve m0 ~ m11
-            // compute (~x,~y)
+            float m[12];
+            m[11] = 1 / sqrt(s(8,1) * s(8,1) + s(9,1) * s(9,1) + s(10,1) * s(10,1));
+            for(int i = 0; i < 11; ++i)
+                m[i] = s(i,1) * m[11];
+            Eigen::Matrix<float,3,4> M;
+            M << m[0], m[1], m[2],
+                 m[3], m[4], m[5],
+                 m[6], m[7], m[8],
+                 m[9], m[10], m[11];
+            // compute (~x,~y) of temporary
+            vector<Eigen::Vector2f> vec_pixo;
+            for(const auto& wp : *((this->point_World)[0]))
+            {
+                Eigen::Vector4f point_World1(wp[0], wp[1], wp[2], 1.0);
+                Eigen::Vector3f tmp;
+                Eigen::Vector2f pixo;
+                tmp = M * point_World1;
+                pixo[0] = tmp[0] / tmp[2];
+                pixo[1] = tmp[1] / tmp[2];
+                vec_pixo.push_back(pixo);
+            }
+            this->point_Pixo.clear();
+            this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
+            // compute Aberration dt_x,dt_y
             // compute k0 ~ k4
             // fix Aberration
 

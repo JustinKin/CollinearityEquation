@@ -131,5 +131,15 @@ private:
 };
 
 std::vector<std::shared_ptr<std::vector<std::string>>> ReadFiles(const std::string &file_);
+
 void CheckData(std::vector<std::shared_ptr<std::vector<std::string>>> file_, const std::string &str_);
+
+
+
+
+
+
+
+
+
 #endif
