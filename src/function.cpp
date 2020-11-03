@@ -407,7 +407,7 @@ void PicPara_opt::Initialize(std::shared_ptr<Calculate> PicPara_opt_, const stri
 
 void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
 {
-    // compute real (x,y) using k0 ~ k4
+    // compute opt (~x,~y) using k0 ~ k4
     // k0 ~ k4 for each camera
     auto bg_coeAb = (*(PicPara_opt_->coe_Aberr)).begin();
     auto bg_Cams = (PicPara_opt_->Cams).begin();
@@ -623,8 +623,10 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
         // auto ed_worldpoint = ((this->point_World)[0])->end();
         // auto bg_pixpiont = eachfile->begin();
 
-        // iteration of solving k0 ~ k4
-        for(;;)
+        // iteration for Calibration
+        unsigned iter = 0;
+        unsigned max_iter =100;
+        for(;iter <max_iter;++iter)
         {
             /*
             // Initialize K ,U
@@ -686,7 +688,11 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             this->ComputeCoe_Aberr(Calibration_);
             // fix Aberration
             this->FixAberration(Calibration_);
-
+            // if result stable iteration one more time
+            if(this->Stable(Calibration_))
+            {
+                max_iter = iter + 2;
+            }
         }
 
     // }
@@ -855,6 +861,61 @@ void Calibration::ComputeCoe_Aberr(shared_ptr<Calculate> Calibration_)
 void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
 {
     cout << "Calibration::FixAberration : " << "\n\n";
+    // compute opt (~x,~y) using k0 ~ k4
+    // k0 ~ k4 for each camera
+    this->point_Pixo.clear();
+    auto bg_coeAb = (*(Calibration_->coe_Aberr)).begin();
+    auto bg_Cams = (Calibration_->Cams).begin();
+    const unsigned iter_max = 100;
+    const double residual = 1e-10;
+    for(const auto &eachfile : this->point_Pix)
+    {
+        const auto &k0 = ((*bg_coeAb)(0,0));
+        const auto &k1 = ((*bg_coeAb)(1,0));
+        const auto &k2 = ((*bg_coeAb)(2,0));
+        const auto &k3 = ((*bg_coeAb)(3,0));
+        const auto &k4 = ((*bg_coeAb)(4,0));
+        const auto &Cx = ((*bg_Cams)->point_PicPrin[0]);
+        const auto &Cy = ((*bg_Cams)->point_PicPrin[1]);
+        const auto &Fx = ((*bg_Cams)->foclen_Equ[0]);
+        const auto &Fy = ((*bg_Cams)->foclen_Equ[1]);
+        vector<Eigen::Vector2f> vec_Pixo;
+        for(const auto & point : (*eachfile))
+        {
+            float x_tmp = point[0];
+            float y_tmp = point[1];
+            float xd = (x_tmp - Cx) / Fx;
+            float yd = (y_tmp - Cy) / Fy;
+            float dt_x_bef = xd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k1 + xd*xd*k3 + xd*yd*k4;
+            float dt_y_bef = yd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k2 + xd*yd*k3 + yd*yd*k4;
+            unsigned iter = 0;
+            for(;iter < iter_max; ++iter)
+            {
+                x_tmp = point[0] - dt_x_bef;
+                y_tmp = point[1] - dt_y_bef;
+                xd = (x_tmp - Cx) / Fx;
+                yd = (y_tmp - Cy) / Fy;
+                float dt_x = xd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k1 + xd*xd*k3 + xd*yd*k4;
+                float dt_y = yd * (xd*xd + yd*yd)*k0 + (xd*xd + yd*yd)*k2 + xd*yd*k3 + yd*yd*k4;
+                double res_x = abs(dt_x - dt_x_bef);
+                double res_y = abs(dt_y - dt_y_bef);
+                if(res_x < residual && res_y <residual)
+                    break;
+                else
+                {
+                    dt_x_bef = dt_x;
+                    dt_y_bef = dt_y;
+                }
+
+            }
+            cout<<"unsigned iter ="<<iter<<endl;
+            Eigen::Vector2f pixo(x_tmp, y_tmp);
+            vec_Pixo.push_back(pixo);
+        }
+        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
+        ++bg_coeAb;
+        ++bg_Cams;
+    }
 
 }
 

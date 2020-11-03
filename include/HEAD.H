@@ -123,6 +123,7 @@ public:
     void ComputeCamPara(std::shared_ptr<Calculate> Calibration_, const std::string &s_);
     void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
     void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
+    bool Stable(std::shared_ptr<Calculate> Calibration_) ;
     ~Calibration() = default;
 
 
