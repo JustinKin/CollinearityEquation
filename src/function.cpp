@@ -691,9 +691,10 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             // if result stable iteration one more time
             if(this->Stable(Calibration_))
             {
-                max_iter = iter + 2;
+                iter= max_iter - 2;
             }
         }
+// 2020.11.3        this->ComputeCamPara(Calibration_,"all");
 
     // }
 
