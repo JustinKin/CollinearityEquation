@@ -58,9 +58,9 @@ BG:
             Calibration calibration;
             auto p = make_shared<Calibration>(calibration);
             calibration.Initialize(p, ComputePoint_Calibration);
-            // p->ComputeCamPara_in();
-            // p->ComputeCamPara_out();
             calibration.ComputePoint(p);
+            p->ComputeCamPara_in();
+            p->ComputeCamPara_out();
             calibration.ShowResult(p, result_calibration);
         }
         break;

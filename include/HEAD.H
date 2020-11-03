@@ -20,6 +20,8 @@ class CamPara
 public:
     CamPara() = default;
     CamPara(Eigen::Vector2f &point_PicPrin_,
+            Eigen::Vector2f &foclen_Equ_);
+    CamPara(Eigen::Vector2f &point_PicPrin_,
             Eigen::Vector2f &foclen_Equ_,
             Eigen::Vector3f &tranT_Vec_,
             Eigen::Matrix3f &rot_Mat_);
@@ -117,8 +119,8 @@ public:
     void Initialize(std::shared_ptr<Calculate> Calibration_, const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate> &Calibration_) override;
     void ComputeAberration();
-    void ComputeCoe_Aberr();
-    void ComputeCamPara(const std::string &s_);
+    void ComputeCoe_Aberr(std::shared_ptr<Calculate> Calibration_);
+    void ComputeCamPara(std::shared_ptr<Calculate> Calibration_, const std::string &s_);
     void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
     void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
     ~Calibration() = default;
@@ -131,8 +133,8 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
     // Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
-    // reprojection Matrix: M
-    std::vector<Eigen::Matrix<float,4,3>> M;
+    // projection Matrix: M
+    std::vector<Eigen::Matrix<float,3,4>> M;
     // Aberration
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> Aberration;
 
