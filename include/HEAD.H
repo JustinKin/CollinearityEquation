@@ -117,6 +117,8 @@ public:
     void ComputePoint(const std::shared_ptr<Calculate> &Calibration_) override;
     void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
     void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
+    void ComputeAberration();
+    void ComputeCoe_Aberr();
     ~Calibration() = default;
 
 
@@ -127,6 +129,9 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
     // Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
+    // Aberration
+    std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> Aberration;
+
 
 };
 

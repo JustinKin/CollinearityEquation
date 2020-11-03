@@ -670,11 +670,35 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             this->point_Pixo.clear();
             this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
             // compute Aberration dt_x,dt_y
+            this->ComputeAberration();
             // compute k0 ~ k4
+            this->ComputeCoe_Aberr();
             // fix Aberration
 
         }
     }
+
+}
+
+void Calibration::ComputeAberration()
+{
+    auto bg_pixo = (this->point_Pixo).begin();
+    for(const auto& pixfile :this->point_Pix)
+    {
+        vector<Eigen::Vector2f> vec_Aberr;
+        auto iter_pixo = (*bg_pixo)->begin();
+        for(const auto& pix : *pixfile)
+        {
+            vec_Aberr.push_back(pix - (*iter_pixo));
+            ++iter_pixo;
+        }
+        this->Aberration.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Aberr));
+        ++bg_pixo;
+    }
+}
+
+void Calibration::ComputeCoe_Aberr()
+{
 
 }
 
