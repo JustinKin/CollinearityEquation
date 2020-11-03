@@ -607,7 +607,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
     // each camera corresponding to a group coe_Aberration
     for(const auto& eachfile : (this->point_Pix))
     {
-        unsigned rows = ((*((this->point_Pix)[0])).size()) * 2;//this->point_Pix)[i]
+        unsigned rows = ((*eachfile).size()) * 2;
         Eigen::MatrixXf K;
         K.resize(rows,11);
         Eigen::MatrixXf U;
@@ -619,7 +619,6 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
         // iteration of solving k0 ~ k4
         for(;;)
         {
-            // cout << "Calibration::FixAberration :  1" << "\n\n";
             // Initialize K ,U
             // r = row
             unsigned r = 0;
@@ -627,7 +626,6 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             const auto& pixpoint = *bg_pixpiont;
             for(; r < rows; )
             {
-                // cout << "Calibration::FixAberration :  2" << "\n\n";
                 Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
                 Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
 
@@ -647,9 +645,9 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             Eigen::Matrix<float,11,1> s = a.lu().solve(b);
             //  solve m0 ~ m11
             float m[12];
-            m[11] = 1 / sqrt(s(8,1) * s(8,1) + s(9,1) * s(9,1) + s(10,1) * s(10,1));
+            m[11] = 1 / sqrt(s(8,0) * s(8,0) + s(9,0) * s(9,0) + s(10,0) * s(10,0));
             for(int i = 0; i < 11; ++i)
-                m[i] = s(i,1) * m[11];
+                m[i] = s(i,0) * m[11];
             Eigen::Matrix<float,3,4> M;
             M << m[0], m[1], m[2],
                  m[3], m[4], m[5],
@@ -679,9 +677,89 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
     }
 
 }
+// compute ComputeCamPara:(Cx,Cy),(Fx,Fy),(Tx,Ty,Tz),(r0 ~ r8)
+void Calibration::ComputeCamPara(const string &s)
+{
+    cout << "Calibration::ComputeCamPara : " << "\n\n";
+    //compute (Cx,Cy),(Fx,Fy) only
+    this->M.clear();
+    for(const auto& eachfile : (this->point_Pix))
+    {
+        unsigned rows = ((*eachfile).size()) * 2;
+        Eigen::MatrixXf K;
+        K.resize(rows,11);
+        Eigen::MatrixXf U;
+        U.resize(rows,1);
+        auto bg_worldpoint = ((this->point_World)[0])->begin();//exiting something to do, for some cameras can not capture all points
+        auto bg_pixo = (this->point_Pixo).begin();//2020.11.02
+        // auto ed_worldpoint = ((this->point_World)[0])->end();
+        auto bg_pixpiont = eachfile->begin();
+        // iteration of solving k0 ~ k4
+        for(;;)
+        {
+            // Initialize K ,U
+            // r = row
+            unsigned r = 0;
+            const auto& worldpoint = *bg_worldpoint;
+            const auto& pixpoint = *bg_pixpiont;
+            for(; r < rows; )
+            {
+                Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
+                Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
 
+                K.row(r) << XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose();
+                U(r++,0) = pixpoint[0];
+                K.row(r) << ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose();
+                U(r++,0) = pixpoint[1];
+                ++bg_worldpoint;
+                ++bg_pixpiont;
+            }
+            // solve s0 ~ s10
+            Eigen::MatrixXf KT;
+            KT.resize(11,rows);
+            KT = K.transpose();
+            Eigen::Matrix<float,11,11> a = KT * K;
+            Eigen::Matrix<float,11,1> b = KT * U;
+            Eigen::Matrix<float,11,1> s = a.lu().solve(b);
+            //  solve m0 ~ m11
+            float m[12];
+            m[11] = 1 / sqrt(s(8,0) * s(8,0) + s(9,0) * s(9,0) + s(10,0) * s(10,0));
+            for(int i = 0; i < 11; ++i)
+                m[i] = s(i,0) * m[11];
+            Eigen::Matrix<float,4,3> M;
+            M << m[0], m[1], m[2],  m[3],
+                 m[4], m[5], m[6],  m[7],
+                 m[8], m[9], m[10], m[11];
+            this->M.push_back(M);
+            // solve (Cx,Cy),(Fx,Fy)
+            Eigen::Vector3f S1(s(0,0), s(1,0), s(2,0));
+            Eigen::Vector3f S2(s(4,0), s(5,0), s(6,0));
+            Eigen::Vector3f S3(s(8,0), s(9,0), s(10,0));
+            Eigen::Vector2f point_PicPrin;
+            Eigen::Vector2f foclen_Equ_;
+            point_PicPrin[0] = m[11] * m[11] * S1.transpose() * S2;//(S1.transpose()) .dot(S2)?
+            point_PicPrin[1] = m[11] * m[11] * S2.transpose() * S3;
+            foclen_Equ_[0] = m[11] * m[11] *((S1.cross(S3)).determinant());
+            foclen_Equ_[1] = m[11] * m[11] *((S2.cross(S3)).determinant());
+        }
+    }
+
+
+
+
+
+    // if s == "all" , compute (Tx,Ty,Tz),(r0 ~ r8)
+    if(s == "all")
+    {
+
+    }
+}
+
+
+// ComputeAberration : pix - pixo
 void Calibration::ComputeAberration()
 {
+    cout << "Calibration::ComputeAberration : " << "\n\n";
     auto bg_pixo = (this->point_Pixo).begin();
     for(const auto& pixfile :this->point_Pix)
     {
@@ -697,9 +775,10 @@ void Calibration::ComputeAberration()
     }
 }
 
+// compute k0 ~ k4
 void Calibration::ComputeCoe_Aberr()
 {
-
+ cout << "Calibration::ComputeCoe_Aberr : " << "\n\n";
 }
 
 void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)

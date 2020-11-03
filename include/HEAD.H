@@ -3,6 +3,7 @@ TODO:
 1. void FixAberration for cali class
 2. add noise for forward 2 class
 3. seems nothing change in picpara_opt.ShowResult after FixAberration
+4. exiting something to do in Calibration, for some cameras can not capture all world_points
  */
 
 
@@ -115,10 +116,11 @@ public:
     Calibration() = default;
     void Initialize(std::shared_ptr<Calculate> Calibration_, const std::string &file_) override;
     void ComputePoint(const std::shared_ptr<Calculate> &Calibration_) override;
-    void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
-    void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
     void ComputeAberration();
     void ComputeCoe_Aberr();
+    void ComputeCamPara(const std::string &s_);
+    void ShowResult(const std::shared_ptr<Calculate> &Calibration_, const std::string &outfile_) override;
+    void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
     ~Calibration() = default;
 
 
@@ -129,6 +131,8 @@ private:
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pix;
     // Pic Coordinate of opt: (~x,~y)
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> point_Pixo;
+    // reprojection Matrix: M
+    std::vector<Eigen::Matrix<float,4,3>> M;
     // Aberration
     std::vector<std::shared_ptr<std::vector<Eigen::Vector2f>>> Aberration;
 
