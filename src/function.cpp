@@ -7,7 +7,7 @@
 #include <random>
 #include <ctime>
 #include <cmath>
-#include <D:/QinJunyou/C/Eigen3/Eigen/Eigen>
+#include <D:/QinJunyou/C/Eigen3/Eigen/Core>
 #include<D:/QinJunyou/C/Eigen3/Eigen/LU>
 
 #include "HEAD.H"
@@ -453,7 +453,7 @@ void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
                 }
 
             }
-            cout<<"unsigned iter ="<<iter<<endl;
+            // cout<<"unsigned iter ="<<iter<<endl;
             Eigen::Vector2f pixo(x_tmp, y_tmp);
             vec_Pixo.push_back(pixo);
         }
@@ -626,6 +626,8 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
         // iteration for Calibration
         unsigned iter = 0;
         unsigned max_iter =100;
+        // if flag is "all",compute all of the camera parameters
+        string flag = "1";
         for(;iter <max_iter;++iter)
         {
             /*
@@ -664,7 +666,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
                  m[6], m[7], m[8],
                  m[9], m[10], m[11];
             */
-            this->ComputeCamPara(Calibration_,"1");
+            this->ComputeCamPara(Calibration_,flag);
             // compute (~x,~y) of temporary
             this->point_Pixo.clear();
             for(auto bg_M = (this->M).begin(); bg_M != (this->M).end(); ++bg_M)
@@ -689,12 +691,14 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             // fix Aberration
             this->FixAberration(Calibration_);
             // if result stable iteration one more time
+            if(flag == "all")
+                break;
             if(this->Stable(Calibration_))
             {
-                iter= max_iter - 2;
+                flag = "all";
             }
+            cout << "Calibration::ComputePoint iter = "<<iter<<endl;
         }
-// 2020.11.3        this->ComputeCamPara(Calibration_,"all");
 
     // }
 
@@ -702,7 +706,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 // compute ComputeCamPara:M,(Cx,Cy),(Fx,Fy),(Tx,Ty,Tz),(r0 ~ r8)
 void Calibration::ComputeCamPara(shared_ptr<Calculate> Calibration_,const string &str_)
 {
-    cout << "Calibration::ComputeCamPara : " << "\n\n";
+    // cout << "Calibration::ComputeCamPara : " << "\n\n";
     //compute (Cx,Cy),(Fx,Fy) only
     this->M.clear();
     Calibration_->Cams.clear();
@@ -796,7 +800,7 @@ void Calibration::ComputeCamPara(shared_ptr<Calculate> Calibration_,const string
 // ComputeAberration : pix - pixo
 void Calibration::ComputeAberration()
 {
-    cout << "Calibration::ComputeAberration : " << "\n\n";
+    // cout << "Calibration::ComputeAberration : " << "\n\n";
     auto bg_pixo = (this->point_Pixo).begin();
     for(const auto& pixfile :this->point_Pix)
     {
@@ -815,7 +819,7 @@ void Calibration::ComputeAberration()
 // compute k0 ~ k4
 void Calibration::ComputeCoe_Aberr(shared_ptr<Calculate> Calibration_)
 {
-    cout << "Calibration::ComputeCoe_Aberr : " << "\n\n";
+    // cout << "Calibration::ComputeCoe_Aberr : " << "\n\n";
     (Calibration_->coe_Aberr).reset(new vector<Eigen::Matrix<float,5,1>>);
     auto bg_M = this->M.begin();
     auto bg_Aberr = this->Aberration.begin();
@@ -861,7 +865,7 @@ void Calibration::ComputeCoe_Aberr(shared_ptr<Calculate> Calibration_)
 
 void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
 {
-    cout << "Calibration::FixAberration : " << "\n\n";
+    // cout << "Calibration::FixAberration : " << "\n\n";
     // compute opt (~x,~y) using k0 ~ k4
     // k0 ~ k4 for each camera
     this->point_Pixo.clear();
@@ -920,6 +924,39 @@ void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
 
 }
 
+bool Calibration::Stable(shared_ptr<Calculate> Calibration_)
+{
+    float threshold = 1e-10;
+    if((this->coe_Aberr_tmp))
+    {
+        vector<Eigen::Matrix<float,5,1>> residual_coe;
+        auto coeAberr_tmp = (this->coe_Aberr_tmp)->begin();
+        for( const auto & coeAberr : *(Calibration_->coe_Aberr) )
+        {
+            residual_coe.push_back(coeAberr - (*coeAberr_tmp));
+            ++coeAberr_tmp;
+        }
+        for( const auto&  res : residual_coe)
+        {
+            Eigen::Array<float,5,1> res_abs = res.array().abs();
+            if(res_abs.maxCoeff() > threshold )
+            {
+                vector<Eigen::Matrix<float,5,1>> tmp(*(Calibration_->coe_Aberr));
+                (this->coe_Aberr_tmp).reset(new vector<Eigen::Matrix<float,5,1>>);
+                this->coe_Aberr_tmp = make_shared<vector<Eigen::Matrix<float,5,1>>>(tmp);
+                return false;
+            }
+        }
+        return true;
+    }
+    else
+    {
+        vector<Eigen::Matrix<float,5,1>> tmp(*(Calibration_->coe_Aberr));
+        this->coe_Aberr_tmp = make_shared<vector<Eigen::Matrix<float,5,1>>>(tmp);
+        return false;
+    }
+}
+
 void Calibration::ShowResult(const shared_ptr<Calculate> &Calibration_, const string &outfile_)
 {
     string outfile(outfile_ + ".txt");
@@ -928,7 +965,7 @@ void Calibration::ShowResult(const shared_ptr<Calculate> &Calibration_, const st
     const auto CamPara = Calibration_->GetCamPara();
     auto CamPara_in = (*Calibration_->CamPara_in).begin();
     auto CamPara_out = (*Calibration_->CamPara_out).begin();
-    auto iter_coe_Aberr = (*(this->coe_Aberr)).begin();
+    auto iter_coe_Aberr = (*(Calibration_->coe_Aberr)).begin();
     auto iter_M = (this->M).begin();
     int i = 1;
     ofstream out(outfile_ + ".txt");

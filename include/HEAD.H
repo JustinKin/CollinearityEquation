@@ -4,6 +4,7 @@ TODO:
 2. add noise for forward 2 class
 3. seems nothing change in picpara_opt.ShowResult after FixAberration
 4. exiting something to do in Calibration, for some cameras can not capture all world_points
+5. if there is a camera Calibration is stable earlier than others , it should not be iterated again
  */
 
 
@@ -125,7 +126,8 @@ public:
     void FixAberration(const std::shared_ptr<Calculate> &Calibration_) override;
     bool Stable(std::shared_ptr<Calculate> Calibration_) ;
     ~Calibration() = default;
-
+    // Aberration coefficients of temporary:（k0~k4）
+    std::shared_ptr<std::vector<Eigen::Matrix<float,5,1>>> coe_Aberr_tmp;
 
 private:
     // World Coordinate: (X,Y,Z)
