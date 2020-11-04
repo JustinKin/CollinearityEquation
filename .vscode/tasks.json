@@ -6,9 +6,9 @@
             "label": "GoodLuck-G++",
             "command": "C:/mingw64/bin/g++.exe",
             "args": [//编译时候的参数
-                //"-mfma",//需要haswell
-                //"-msse4",//4代u,4
-                //"-mavx2",//4代u,2
+                // "-mfma",//需要haswell
+                // "-msse4",//4代u,4
+                // "-mavx2",//4代u,2
                 "-march=native",//启用您的cpu支持的所有选项，开太多负优化？
                 "-O2",//推荐用2
                 "-fopenmp",//开启多线程，需要测试看看是不是负优化了

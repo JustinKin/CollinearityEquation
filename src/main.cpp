@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     int choice;
 BG:
     cout << "==========================================\n";
-    cout << "1.Compute Pic Coordinate of opt: (~x,~y)\n";
+    cout << "1.Compute Pic Coordinate of opt and real: (~x,~y), (x,y)\n";
     cout << "2.Compute World Coordinate: (X,Y,Z):\n";
     cout << "3.Calibration:\n";
     cout << "4.EXIT\n\n";
