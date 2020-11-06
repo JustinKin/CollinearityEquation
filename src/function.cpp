@@ -596,10 +596,9 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
         }
         this->point_Pix.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
         // using pix of real as piox for the first time of iteration
-        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pix));
+        vector<Eigen::Vector2f> vec_Pixo(vec_Pix);
+        this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Pixo));
     }
-
-
 }
 
 void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
@@ -625,7 +624,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 
         // iteration for Calibration
         unsigned iter = 0;
-        unsigned max_iter =10000;
+        unsigned max_iter =1000;
         // if flag is "all",compute all of the camera parameters
         string flag = "1";
         for(;iter <max_iter;++iter)
