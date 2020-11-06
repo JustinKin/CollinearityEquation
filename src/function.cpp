@@ -808,6 +808,7 @@ void Calibration::ComputeCamPara(shared_ptr<Calculate> Calibration_,const string
 // ComputeAberration : pix - pixo
 void Calibration::ComputeAberration()
 {
+    (this->Aberration).clear();
     // cout << "Calibration::ComputeAberration : " << "\n\n";
     auto bg_pixo = (this->point_Pixo).begin();
     for(const auto& pixfile :this->point_Pix)
@@ -884,7 +885,7 @@ void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
     this->point_Pixo.clear();
     auto bg_coeAb = (*(Calibration_->coe_Aberr)).begin();
     auto bg_Cams = (Calibration_->Cams).begin();
-    const unsigned iter_max = 100;
+    const unsigned iter_max = 1000;
     const double residual = 1e-10;
     for(const auto &eachfile : this->point_Pix)
     {
