@@ -34,6 +34,16 @@ nan nan nan nan nan
 
 ==================================
 
+Pic Coordinate of opt: (~x,~y):
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
 Camera : 2
 Pic Principle Coordinate: (Cx,Cy)
 nan nan
@@ -70,6 +80,16 @@ nan nan nan nan nan
 
 ==================================
 
+Pic Coordinate of opt: (~x,~y):
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
+nan nan
 Camera : 3
 Pic Principle Coordinate: (Cx,Cy)
 989.822 547.004
@@ -106,3 +126,24 @@ Aberration coefficients:（k0~k4）
 
 ==================================
 
+Pic Coordinate of opt: (~x,~y):
+609.31 363.719
+652.52 329.783
+972.987 451.532
+609.081 768.478
+776.974 655.482
+905.82 574.177
+1011.66 696.95
+502.434 461.394
+923.88 886.445
+1009.07 514.419
+802.669 700.076
+1224.28 721.312
+417.836 697.576
+1178.49 231.478
+807.758 797.825
+614.322 556.49
+985.7 564.281
+1104.82 562.99
+945.318 748.64
+637.64 716.812

@@ -622,10 +622,12 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
                 Eigen::Vector4f point_World1(wp[0], wp[1], wp[2], 1.0);
                 Eigen::Vector3f tmp;
                 Eigen::Vector2f pixo;
+                // cout << "*bg_M = \n"<<*bg_M<<endl;
                 tmp = (*bg_M) * point_World1;
                 pixo[0] = tmp[0] / tmp[2];
                 pixo[1] = tmp[1] / tmp[2];
                 vec_pixo.push_back(pixo);
+                // cout << "pixo = \n"<<pixo<<endl;
             }
             this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
         }
@@ -899,6 +901,7 @@ void Calibration::ShowResult(const shared_ptr<Calculate> &Calibration_, const st
     const auto CamPara = Calibration_->GetCamPara();
     auto CamPara_in = (*Calibration_->CamPara_in).begin();
     auto CamPara_out = (*Calibration_->CamPara_out).begin();
+    auto bgPixo = (this->point_Pixo).begin();
     auto iter_coe_Aberr = (*(Calibration_->coe_Aberr)).begin();
     auto iter_M = (this->M).begin();
     int i = 1;
@@ -925,10 +928,18 @@ void Calibration::ShowResult(const shared_ptr<Calculate> &Calibration_, const st
             << (*iter_coe_Aberr)[3]<<" "<< (*iter_coe_Aberr)[4]<< "\n\n";
 
         out << "==================================\n\n";
+        auto results_o = (*bgPixo);
+        auto bgRes_o = (*results_o).begin();
+        auto edRes_o = (*results_o).end();
+        out << "Pic Coordinate of opt: (~x,~y):\n";
+        for (; bgRes_o != edRes_o; ++bgRes_o)
+            out << (*bgRes_o)[0] << " " << (*bgRes_o)[1] << "\n";
+
         ++CamPara_in;
         ++CamPara_out;
         ++iter_coe_Aberr;
         ++iter_M;
+        ++bgPixo;
     }
     out.close();
 
