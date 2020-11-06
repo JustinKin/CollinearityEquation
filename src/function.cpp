@@ -625,7 +625,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 
         // iteration for Calibration
         unsigned iter = 0;
-        unsigned max_iter =12;
+        unsigned max_iter =10000;
         // if flag is "all",compute all of the camera parameters
         string flag = "1";
         for(;iter <max_iter;++iter)
@@ -666,7 +666,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
                  m[6], m[7], m[8],
                  m[9], m[10], m[11];
             */
-            this->ComputeCamPara(Calibration_,flag);
+            this->ComputeCamPara(Calibration_,"all");
             // compute (~x,~y) of temporary
             this->point_Pixo.clear();
             for(auto bg_M = (this->M).begin(); bg_M != (this->M).end(); ++bg_M)
@@ -701,7 +701,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
             {
                 flag = "all";
             }
-            cout << "Calibration::ComputePoint iter = "<<iter<<endl;
+            // cout << "Calibration::ComputePoint iter = "<<iter<<endl;
         }
 
     // }
@@ -710,7 +710,7 @@ void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 // compute ComputeCamPara:M,(Cx,Cy),(Fx,Fy),(Tx,Ty,Tz),(r0 ~ r8)
 void Calibration::ComputeCamPara(shared_ptr<Calculate> Calibration_,const string &str_)
 {
-    cout << "\nCalibration::ComputeCamPara : " << "\n";
+    // cout << "\nCalibration::ComputeCamPara : " << "\n";
     //compute (Cx,Cy),(Fx,Fy) only
     this->M.clear();
     Calibration_->Cams.clear();
@@ -849,7 +849,7 @@ void Calibration::ComputeCoe_Aberr(shared_ptr<Calculate> Calibration_)
         const auto &Cy = (*bg_Cams)->point_PicPrin[1];
         const auto &Fx = (*bg_Cams)->foclen_Equ[0];
         const auto &Fy = (*bg_Cams)->foclen_Equ[1];
-        const auto &Aberr = (*bg_Aberr)->begin();
+        auto Aberr = (*bg_Aberr)->begin();
         unsigned r = 0;
         // Ax = B , x is (k0 ~ k4)
         for(const auto &piox : (*pixofile))
@@ -862,6 +862,7 @@ void Calibration::ComputeCoe_Aberr(shared_ptr<Calculate> Calibration_)
             B(r++,0) = (*Aberr)[0];
             A(r,0) = yd * sm; A(r,1) =0; A(r,2) = sm; A(r,3) = xd * yd; A(r,4) = yd * yd;
             B(r++,0) = (*Aberr)[1];
+            ++Aberr;
         }
         Eigen::MatrixXf AT = A.transpose();
         Eigen::Matrix<float,5,5> a = AT * A;
@@ -925,7 +926,7 @@ void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
                 }
 
             }
-            cout<<"Calibration::FixAberration iter ="<<iter<<endl;
+            // cout<<"Calibration::FixAberration iter ="<<iter<<endl;
             Eigen::Vector2f pixo(x_tmp, y_tmp);
             vec_Pixo.push_back(pixo);
         }

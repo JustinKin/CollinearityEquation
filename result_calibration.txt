@@ -1,72 +1,108 @@
 Camera : 1
 Pic Principle Coordinate: (Cx,Cy)
-1201.46 1199.88
+nan nan
 
 Equivalent Focal Length: (Fx,Fy)
-798.352 800.903
+nan nan
 
 Translation Vector: (Tx,Ty,Tz)
-50.0287 49.9909 50.0193
+nan nan nan
 
 Rotation Matrix: (r0 ~ r8)
-    0.999999   0.00140636 -0.000772233
--0.000608233            1  0.000294698
- 0.000772671 -0.000294193            1
+nan nan nan
+nan nan nan
+nan nan nan
 
 Parameters_in
-798.352       0 1201.46       0
-      0 800.903 1199.88       0
-      0       0       1       0
+nan   0 nan   0
+  0 nan nan   0
+  0   0   1   0
 
 Parameters_out
-    0.999999   0.00140636 -0.000772233      50.0287
--0.000608233            1  0.000294698      49.9909
- 0.000772671 -0.000294193            1      50.0193
-           0            0            0            1
+nan nan nan nan
+nan nan nan nan
+nan nan nan nan
+  0   0   0   1
 
 projection Matrix: M
-     799.279     0.769311      1200.84       100037
-     0.43998       800.55      1200.12       100055
- 0.000772671 -0.000294193            1      50.0193
+nan nan nan nan
+nan nan nan nan
+nan nan nan nan
 
 Aberration coefficients:（k0~k4）
-0.00796733 0.494641 -0.00237539 -0.151977 -0.410613
+nan nan nan nan nan
 
 ==================================
 
 Camera : 2
 Pic Principle Coordinate: (Cx,Cy)
-1101.52 1099.76
+nan nan
 
 Equivalent Focal Length: (Fx,Fy)
-898.736 901.074
+nan nan
 
 Translation Vector: (Tx,Ty,Tz)
-60.0141 59.9989 60.0249
+nan nan nan
 
 Rotation Matrix: (r0 ~ r8)
-    0.999999   0.00115277  -0.00092322
- -0.00047384            1  0.000521274
- 0.000923781 -0.000520885     0.999999
+nan nan nan
+nan nan nan
+nan nan nan
 
 Parameters_in
-898.736       0 1101.52       0
-      0 901.074 1099.76       0
+nan   0 nan   0
+  0 nan nan   0
+  0   0   1   0
+
+Parameters_out
+nan nan nan nan
+nan nan nan nan
+nan nan nan nan
+  0   0   0   1
+
+projection Matrix: M
+nan nan nan nan
+nan nan nan nan
+nan nan nan nan
+
+Aberration coefficients:（k0~k4）
+nan nan nan nan nan
+
+==================================
+
+Camera : 3
+Pic Principle Coordinate: (Cx,Cy)
+990.317 548.039
+
+Equivalent Focal Length: (Fx,Fy)
+1777.2 1365.07
+
+Translation Vector: (Tx,Ty,Tz)
+-9.8901 5.42818 116.315
+
+Rotation Matrix: (r0 ~ r8)
+ 0.565396  0.568852  0.597272
+-0.617888  0.771841 -0.149921
+-0.546282 -0.284283  0.787883
+
+Parameters_in
+ 1777.2       0 990.317       0
+      0 1365.07 548.039       0
       0       0       1       0
 
 Parameters_out
-    0.999999   0.00115277  -0.00092322      60.0141
- -0.00047384            1  0.000521274      59.9989
- 0.000923781 -0.000520885     0.999999      60.0249
-           0            0            0            1
+ 0.565396  0.568852  0.597272   -9.8901
+-0.617888  0.771841 -0.149921   5.42818
+-0.546282 -0.284283  0.787883   116.315
+        0         0         0         1
 
 projection Matrix: M
-     899.753     0.462273      1100.69       120055
-    0.588968      900.501      1100.22       120076
- 0.000923781 -0.000520885     0.999999      60.0249
+  463.827   729.433   1841.72   97611.8
+ -1142.85   897.822   227.136   71154.8
+-0.546282 -0.284283  0.787883   116.315
 
 Aberration coefficients:（k0~k4）
-14.7689 -16.1983 -117.123 -81.6084 75.8706
+-1.42241 0.0554803 -0.113416 -0.328716 0.561941
 
 ==================================
 
