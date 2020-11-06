@@ -604,112 +604,48 @@ void Calibration::Initialize(std::shared_ptr<Calculate> Calibration_, const stri
 void Calibration::ComputePoint(const shared_ptr<Calculate> &Calibration_)
 {
 
-    // for each camera, each "cali_pix_*.txt" corresponding to a camera
-    // each camera corresponding to a group coe_Aberration
-
-
-    // for(const auto& eachfile : (this->point_Pix))
-    // {
-        /*
-        unsigned rows = ((*eachfile).size()) * 2;
-        Eigen::MatrixXf K;
-        K.resize(rows,11);
-        Eigen::MatrixXf U;
-        U.resize(rows,1);
-        */
-        // auto bg_worldpoint = ((this->point_World)[0])->begin();
-        // auto bg_pixo = (this->point_Pixo).begin();
-        // auto ed_worldpoint = ((this->point_World)[0])->end();
-        // auto bg_pixpiont = eachfile->begin();
-
-        // iteration for Calibration
-        unsigned iter = 0;
-        unsigned max_iter =1000;
-        // if flag is "all",compute all of the camera parameters
-        string flag = "1";
-        for(;iter <max_iter;++iter)
+    // iteration for Calibration
+    unsigned iter = 0;
+    unsigned max_iter =1000;
+    // if flag is "all",compute all of the camera parameters
+    string flag = "1";
+    for(;iter <max_iter;++iter)
+    {
+        this->ComputeCamPara(Calibration_,"all");
+        // compute (~x,~y) of temporary
+        this->point_Pixo.clear();
+        for(auto bg_M = (this->M).begin(); bg_M != (this->M).end(); ++bg_M)
         {
-            /*
-            // Initialize K ,U
-            // r = row
-            unsigned r = 0;
-            const auto& worldpoint = *bg_worldpoint;
-            const auto& pixpoint = *bg_pixpiont;
-            for(; r < rows; )
+            vector<Eigen::Vector2f> vec_pixo;
+            for(const auto& wp : *((this->point_World)[0]))
             {
-                Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
-                Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
-
-                K.row(r) << XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose();
-                U(r++,0) = pixpoint[0];
-                K.row(r) << ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose();
-                U(r++,0) = pixpoint[1];
-                ++bg_worldpoint;
-                ++bg_pixpiont;
+                Eigen::Vector4f point_World1(wp[0], wp[1], wp[2], 1.0);
+                Eigen::Vector3f tmp;
+                Eigen::Vector2f pixo;
+                tmp = (*bg_M) * point_World1;
+                pixo[0] = tmp[0] / tmp[2];
+                pixo[1] = tmp[1] / tmp[2];
+                vec_pixo.push_back(pixo);
             }
-            // solve s0 ~ s10
-            Eigen::MatrixXf KT;
-            KT.resize(11,rows);
-            KT = K.transpose();
-            Eigen::Matrix<float,11,11> a = KT * K;
-            Eigen::Matrix<float,11,1> b = KT * U;
-            Eigen::Matrix<float,11,1> s = a.lu().solve(b);
-            //  solve m0 ~ m11
-            float m[12];
-            m[11] = 1 / sqrt(s(8,0) * s(8,0) + s(9,0) * s(9,0) + s(10,0) * s(10,0));
-            for(int i = 0; i < 11; ++i)
-                m[i] = s(i,0) * m[11];
-            Eigen::Matrix<float,3,4> M;
-            M << m[0], m[1], m[2],
-                 m[3], m[4], m[5],
-                 m[6], m[7], m[8],
-                 m[9], m[10], m[11];
-            */
-            this->ComputeCamPara(Calibration_,"all");
-            // compute (~x,~y) of temporary
-            this->point_Pixo.clear();
-            for(auto bg_M = (this->M).begin(); bg_M != (this->M).end(); ++bg_M)
-            {
-                vector<Eigen::Vector2f> vec_pixo;
-                for(const auto& wp : *((this->point_World)[0]))
-                {
-                    Eigen::Vector4f point_World1(wp[0], wp[1], wp[2], 1.0);
-                    Eigen::Vector3f tmp;
-                    Eigen::Vector2f pixo;
-                    tmp = (*bg_M) * point_World1;
-                    pixo[0] = tmp[0] / tmp[2];
-                    pixo[1] = tmp[1] / tmp[2];
-                    vec_pixo.push_back(pixo);
-                }
-                this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
-                        // for(const auto& p : vec_pixo)
-                        //     cout<<"pixo:\n" <<p<< "\n ";
-                        // cout<<endl<<endl;
-
-            }
-            // compute Aberration dt_x,dt_y
-            this->ComputeAberration();
-            // compute k0 ~ k4
-            this->ComputeCoe_Aberr(Calibration_);
-            // fix Aberration
-            this->FixAberration(Calibration_);
-            // if result stable iteration one more time
-            if(flag == "all")
-                break;
-            if(this->Stable(Calibration_))
-            {
-                flag = "all";
-            }
-            // cout << "Calibration::ComputePoint iter = "<<iter<<endl;
+            this->point_Pixo.push_back(make_shared<vector<Eigen::Vector2f>>(vec_pixo));
         }
-
-    // }
-
+        // compute Aberration dt_x,dt_y
+        this->ComputeAberration();
+        // compute k0 ~ k4
+        this->ComputeCoe_Aberr(Calibration_);
+        // fix Aberration
+        this->FixAberration(Calibration_);
+        // if result stable iteration one more time
+        if(flag == "all")
+            break;
+        if(this->Stable(Calibration_))
+            flag = "all";
+    }
 }
+
 // compute ComputeCamPara:M,(Cx,Cy),(Fx,Fy),(Tx,Ty,Tz),(r0 ~ r8)
 void Calibration::ComputeCamPara(shared_ptr<Calculate> Calibration_,const string &str_)
 {
-    // cout << "\nCalibration::ComputeCamPara : " << "\n";
     //compute (Cx,Cy),(Fx,Fy) only
     this->M.clear();
     Calibration_->Cams.clear();
@@ -720,89 +656,79 @@ void Calibration::ComputeCamPara(shared_ptr<Calculate> Calibration_,const string
         K.resize(rows,11);
         Eigen::MatrixXf U;
         U.resize(rows,1);
-        auto bg_worldpoint = ((this->point_World)[0])->begin();//exiting something to do, for some cameras can not capture all points
-        // auto bg_pixo = (this->point_Pixo).begin();
-        // auto ed_worldpoint = ((this->point_World)[0])->end();
+        auto bg_worldpoint = ((this->point_World)[0])->begin();
         auto bg_pixo = eachfile->begin();
-        // iteration of solving k0 ~ k4
-        // for(;;)
-        // {
-            // Initialize K ,U
-            // r = row
-            unsigned r = 0;
-            for(; r < rows; )
-            {
-                const auto& worldpoint = *bg_worldpoint;
-                const auto& pixpoint = *bg_pixo;
-                Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
-                Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
+        // Initialize K ,U
+        // r = row
+        unsigned r = 0;
+        for(; r < rows; )
+        {
+            const auto& worldpoint = *bg_worldpoint;
+            const auto& pixpoint = *bg_pixo;
+            Eigen::Matrix<float,1,4> XYZ1(worldpoint[0],worldpoint[1],worldpoint[2],1);
+            Eigen::Matrix<float,1,4> ZERO0(0,0,0,0);
 
-                K.row(r) << XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose();
-                U(r++,0) = pixpoint[0];
-                K.row(r) << ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose();
-                U(r++,0) = pixpoint[1];
-                ++bg_worldpoint;
-                ++bg_pixo;
-            }
-            // cout<<"Calibration::ComputeCamPara K = \n"<<K<<endl;
-            // cout<<"Calibration::ComputeCamPara U = \n"<<U<<endl;
-            // solve s0 ~ s10
-            Eigen::MatrixXf KT;
-            KT.resize(11,rows);
-            KT = K.transpose();
-            Eigen::Matrix<float,11,11> a = KT * K;
-            Eigen::Matrix<float,11,1> b = KT * U;
-            Eigen::Matrix<float,11,1> s = a.lu().solve(b);
-            // cout<<"Calibration::ComputeCamPara s = \n"<<s<<endl;
-            //  solve m0 ~ m11
-            float m[12];
-            m[11] = 1 / sqrt(s(8,0) * s(8,0) + s(9,0) * s(9,0) + s(10,0) * s(10,0));
-            for(int i = 0; i < 11; ++i)
-                m[i] = s(i,0) * m[11];
-            Eigen::Matrix<float,3,4> M;
-            M << m[0], m[1], m[2],  m[3],
-                 m[4], m[5], m[6],  m[7],
-                 m[8], m[9], m[10], m[11];
-            // cout<<"Calibration::ComputeCamPara M = \n"<<M<<endl;
-            this->M.push_back(M);
-            // solve (Cx,Cy),(Fx,Fy)
-            Eigen::Vector3f m0(m[0], m[1], m[2]);
-            Eigen::Vector3f m1(m[4], m[5], m[6]);
-            Eigen::Vector3f m2(m[8], m[9], m[10]);
-            Eigen::Vector2f point_PicPrin;
-            Eigen::Vector2f foclen_Equ;
-            point_PicPrin[0] = m0.dot(m2);
-            point_PicPrin[1] = m1.dot(m2);
-            foclen_Equ[0] = sqrt((m0.cross(m2)).dot(m0.cross(m2)));
-            foclen_Equ[1] = sqrt((m1.cross(m2)).dot(m1.cross(m2)));
-            if(str_ != "all")
-                Calibration_->Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin, foclen_Equ)));
-            // solve (Tx,Ty,Tz),(r0 ~ r8)
-            else
+            K.row(r) << XYZ1, ZERO0, (-pixpoint[0] * worldpoint).transpose();
+            U(r++,0) = pixpoint[0];
+            K.row(r) << ZERO0, XYZ1, (-pixpoint[1] * worldpoint).transpose();
+            U(r++,0) = pixpoint[1];
+            ++bg_worldpoint;
+            ++bg_pixo;
+        }
+        // solve s0 ~ s10
+        Eigen::MatrixXf KT;
+        KT.resize(11,rows);
+        KT = K.transpose();
+        Eigen::Matrix<float,11,11> a = KT * K;
+        Eigen::Matrix<float,11,1> b = KT * U;
+        Eigen::Matrix<float,11,1> s = a.lu().solve(b);
+        //  solve m0 ~ m11
+        float m[12];
+        m[11] = 1 / sqrt(s(8,0) * s(8,0) + s(9,0) * s(9,0) + s(10,0) * s(10,0));
+        for(int i = 0; i < 11; ++i)
+            m[i] = s(i,0) * m[11];
+        Eigen::Matrix<float,3,4> M;
+        M << m[0], m[1], m[2],  m[3],
+             m[4], m[5], m[6],  m[7],
+             m[8], m[9], m[10], m[11];
+        // cout<<"Calibration::ComputeCamPara M = \n"<<M<<endl;
+        this->M.push_back(M);
+        // solve (Cx,Cy),(Fx,Fy)
+        Eigen::Vector3f m0(m[0], m[1], m[2]);
+        Eigen::Vector3f m1(m[4], m[5], m[6]);
+        Eigen::Vector3f m2(m[8], m[9], m[10]);
+        Eigen::Vector2f point_PicPrin;
+        Eigen::Vector2f foclen_Equ;
+        point_PicPrin[0] = m0.dot(m2);
+        point_PicPrin[1] = m1.dot(m2);
+        foclen_Equ[0] = sqrt((m0.cross(m2)).dot(m0.cross(m2)));
+        foclen_Equ[1] = sqrt((m1.cross(m2)).dot(m1.cross(m2)));
+        if(str_ != "all")
+            Calibration_->Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin, foclen_Equ)));
+        // solve (Tx,Ty,Tz),(r0 ~ r8)
+        else
+        {
+            Eigen::Vector3f tranT_Vec;
+            Eigen::Matrix3f rot_Mat;
+            float r[9];
+            r[6] = m[8];
+            r[7] = m[9];
+            r[8] = m[10];
+            for(unsigned int i = 0; i <3; ++i)
             {
-                Eigen::Vector3f tranT_Vec;
-                Eigen::Matrix3f rot_Mat;
-                float r[9];
-                r[6] = m[8];
-                r[7] = m[9];
-                r[8] = m[10];
-                for(unsigned int i = 0; i <3; ++i)
-                {
-                    r[i]   = (m[i]   - point_PicPrin[0] * r[i+6]) / foclen_Equ[0];
-                    r[i+3] = (m[i+4] - point_PicPrin[1] * r[i+6]) / foclen_Equ[1];
-                }
-                rot_Mat << r[0], r[1], r[2],
-                           r[3], r[4], r[5],
-                           r[6], r[7], r[8];
-                tranT_Vec[0] = (m[3] - point_PicPrin[0] * m[11]) / foclen_Equ[0];
-                tranT_Vec[1] = (m[7] - point_PicPrin[1] * m[11]) / foclen_Equ[1];
-                tranT_Vec[2] = m[11];
-                Calibration_->Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin, foclen_Equ, tranT_Vec,rot_Mat)));
+                r[i]   = (m[i]   - point_PicPrin[0] * r[i+6]) / foclen_Equ[0];
+                r[i+3] = (m[i+4] - point_PicPrin[1] * r[i+6]) / foclen_Equ[1];
             }
-        // }
+            rot_Mat << r[0], r[1], r[2],
+                       r[3], r[4], r[5],
+                       r[6], r[7], r[8];
+            tranT_Vec[0] = (m[3] - point_PicPrin[0] * m[11]) / foclen_Equ[0];
+            tranT_Vec[1] = (m[7] - point_PicPrin[1] * m[11]) / foclen_Equ[1];
+            tranT_Vec[2] = m[11];
+            Calibration_->Cams.push_back(make_shared<CamPara>(CamPara(point_PicPrin, foclen_Equ, tranT_Vec,rot_Mat)));
+        }
     }
 }
-
 
 // ComputeAberration : pix - pixo
 void Calibration::ComputeAberration()
@@ -817,14 +743,10 @@ void Calibration::ComputeAberration()
         for(const auto& pix : *pixfile)
         {
             vec_Aberr.push_back(pix - (*iter_pixo));
-            // cout <<"=="<<pix - (*iter_pixo);
             ++iter_pixo;
         }
         this->Aberration.push_back(make_shared<vector<Eigen::Vector2f>>(vec_Aberr));
         ++bg_pixo;
-        // for(const auto& p : vec_Aberr)
-        //     cout<<"vec_Aberr:\n"<< p;
-        //     cout<<endl<<endl;
     }
 }
 
@@ -878,7 +800,6 @@ void Calibration::ComputeCoe_Aberr(shared_ptr<Calculate> Calibration_)
 
 void Calibration::FixAberration(const shared_ptr<Calculate> &Calibration_)
 {
-    // cout << "Calibration::FixAberration : " << "\n\n";
     // compute opt (~x,~y) using k0 ~ k4
     // k0 ~ k4 for each camera
     this->point_Pixo.clear();
