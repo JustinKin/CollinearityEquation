@@ -451,7 +451,6 @@ void PicPara_opt::FixAberration(const std::shared_ptr<Calculate> &PicPara_opt_)
                     dt_x_bef = dt_x;
                     dt_y_bef = dt_y;
                 }
-
             }
             // cout<<"unsigned iter ="<<iter<<endl;
             Eigen::Vector2f pixo(x_tmp, y_tmp);
